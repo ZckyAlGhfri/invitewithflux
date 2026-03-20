@@ -10,7 +10,7 @@ export function middleware(req) {
       const authValue = authHeader.split(' ')[1];
       const [user, pwd] = atob(authValue).split(':');
 
-      if (user === 'naufal' && pwd === 'flux2026') {
+      if (user === 'zkyyy' && pwd === 'flux2026') {
         return NextResponse.next(); // Gembok terbuka
       }
     }

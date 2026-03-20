@@ -22,7 +22,7 @@ export default function AdminEditPage() {
     namaPria: '', namaLengkapPria: '', ayahPria: '', ibuPria: '', fotoPria: '', // BARU
     tanggalAkad: '', waktuAkad: '', tempatAkad: '', mapLinkAkad: '',
     tanggalResepsi: '', waktuResepsi: '', tempatResepsi: '', mapLinkResepsi: '',
-    alamatKadoFisik: '', musicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    alamatKadoFisik: '', musicUrl: '/music/DieWithASmile.mp3', // Default musik pengiring
     bankAccounts: [{ bankName: '', accountNumber: '', accountName: '' }]
   });
 
@@ -57,7 +57,7 @@ export default function AdminEditPage() {
         tanggalResepsi: invite.tanggal_resepsi || '', waktuResepsi: invite.waktu_resepsi || '',
         tempatResepsi: invite.tempat_resepsi || '', mapLinkResepsi: invite.map_link_resepsi || '',
         alamatKadoFisik: invite.alamat_kado_fisik || '',
-        musicUrl: invite.music_url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        musicUrl: invite.music_url || '/music/DieWithASmile.mp3',
         bankAccounts: fetchedBanks.length > 0 ? fetchedBanks : [{ bankName: '', accountNumber: '', accountName: '' }]
       });
       setLoading(false);
@@ -194,9 +194,10 @@ export default function AdminEditPage() {
             <div className="mt-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
               <label className="font-bold text-slate-700 block mb-3">Musik Pengiring Undangan</label>
               <select name="musicUrl" value={formData.musicUrl} onChange={handleChange} className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none text-slate-700 font-medium focus:ring-2 focus:ring-purple-400">
-                <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Romantic Piano (Default)</option>
-                <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">A Thousand Years - Instrumental</option>
-                <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">Beautiful In White</option>
+                <option value="/music/DieWithASmile.mp3">Die With A Smile</option>
+                <option value="/music/AThousandYears.mp3">A Thousand Years</option>
+                <option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita</option>
+                <option value="/music/TeruntukMia.mp3">Teruntuk Mia</option>
               </select>
               <MusicPreview url={formData.musicUrl} />
             </div>

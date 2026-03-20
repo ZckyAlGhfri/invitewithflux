@@ -9,6 +9,8 @@ import Link from 'next/link';
 import Form from 'next/form';
 
 export default async function AdminDashboard(props) {
+  const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = rawBaseUrl.replace(/\/$/, "");
   const searchParams = await props.searchParams; 
   const query = searchParams?.q || '';
   const currentPage = Number(searchParams?.page) || 1;
@@ -81,7 +83,7 @@ export default async function AdminDashboard(props) {
           <div className="flex items-center gap-3 px-2 py-2">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white flex items-center justify-center text-sm font-bold shadow-lg">A</div>
             <div>
-              <p className="text-sm font-bold text-white">Admin Naufal</p>
+              <p className="text-sm font-bold text-white">Admin Flux</p>
               <p className="text-[10px] text-purple-400 uppercase tracking-widest font-bold">Superuser</p>
             </div>
           </div>
@@ -191,9 +193,17 @@ export default async function AdminDashboard(props) {
                         </td>
                         <td className="p-5">
                           {isOnboarding ? (
-                             <CopyButton textToCopy={`http://localhost:3000/onboarding/${inv.onboard_token}`} label="Link Form" type="blue" />
+                            <CopyButton 
+                              textToCopy={`${baseUrl}/onboarding/${inv.onboard_token}`} 
+                              label="Link Form" 
+                              type="blue" 
+                            />
                           ) : (
-                             <CopyButton textToCopy={`http://localhost:3000/edit/${inv.edit_token}`} label="Magic Edit" type="purple" />
+                            <CopyButton 
+                              textToCopy={`${baseUrl}/edit/${inv.edit_token}`} 
+                              label="Magic Edit" 
+                              type="purple" 
+                            />
                           )}
                         </td>
                         <td className="p-5 pr-6 text-right">

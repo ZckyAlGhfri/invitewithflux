@@ -24,7 +24,7 @@ export default function OnboardingPage() {
     namaPria: '', namaLengkapPria: '', ayahPria: '', ibuPria: '', fotoPria: '',
     tanggalAkad: '', waktuAkad: '', tempatAkad: '', mapLinkAkad: '',
     tanggalResepsi: '', waktuResepsi: '', tempatResepsi: '', mapLinkResepsi: '',
-    alamatKadoFisik: '', musicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    alamatKadoFisik: '', musicUrl: '/music/DieWithASmile.mp3', // Default musik pengiring
     bankAccounts: [{ bankName: '', accountNumber: '', accountName: '' }]
   });
 
@@ -159,9 +159,10 @@ export default function OnboardingPage() {
               <div>
                 <h3 className="font-bold text-slate-800 mb-3 px-1">Pilih Lagu Pengiring</h3>
                 <select name="musicUrl" value={formData.musicUrl} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
-                  <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Romantic Piano (Default)</option>
-                  <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">A Thousand Years - Instrumental</option>
-                  <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">Beautiful In White</option>
+                  <option value="/music/DieWithASmile.mp3">Die With A Smile</option>
+                  <option value="/music/AThousandYears.mp3">A Thousand Years</option>
+                  <option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita</option>
+                  <option value="/music/TeruntukMia.mp3">Teruntuk Mia</option>
                 </select>
                 <MusicPreview url={formData.musicUrl} />
               </div>

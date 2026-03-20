@@ -134,7 +134,7 @@ export default function InvitationPage({ params, searchParams }) {
         <div className="relative z-20 flex flex-col items-center justify-center text-center px-6 w-full max-w-lg">
           <p className="text-amber-300 tracking-[0.4em] text-xs font-bold uppercase mb-4 drop-shadow-md">The Wedding Of</p>
           <h1 className="text-6xl md:text-8xl font-serif text-white mb-12 drop-shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
-            {data.nama_pria} <span className="text-amber-400 font-light mx-2">&</span> {data.nama_wanita}
+            {data.nama_wanita} <span className="text-amber-400 font-light mx-2">&</span> {data.nama_pria}
           </h1>
 
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-[2rem] w-full mb-10 shadow-2xl">
@@ -189,7 +189,7 @@ export default function InvitationPage({ params, searchParams }) {
             </Reveal>
             <Reveal delay={0.7}>
               <h2 className="text-7xl md:text-9xl font-serif text-white mb-8 drop-shadow-[0_4px_40px_rgba(0,0,0,0.8)]">
-                {data.nama_pria} <span className="text-5xl md:text-7xl mx-2 font-light text-amber-400">&</span> {data.nama_wanita}
+                {data.nama_wanita} <span className="text-5xl md:text-7xl mx-2 font-light text-amber-400">&</span> {data.nama_pria}
               </h2>
             </Reveal>
             <Reveal direction="up" delay={0.9}>
@@ -223,22 +223,8 @@ export default function InvitationPage({ params, searchParams }) {
             </Reveal>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-16 md:gap-24">
-              {/* MEMPELAI PRIA */}
-              <Reveal direction="right" className="flex-1">
-                <div className="flex flex-col items-center group">
-                  <div className="w-56 h-72 md:w-72 md:h-96 rounded-t-[12rem] overflow-hidden border-[12px] border-slate-50 shadow-2xl mb-8 relative transition-transform duration-700 group-hover:-translate-y-4">
-                    <img src={imgPria} alt="Pria" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 border border-amber-200/60 rounded-t-[12rem] m-4 pointer-events-none"></div>
-                  </div>
-                  <h3 className="text-4xl md:text-5xl font-serif text-slate-900 mb-4">{data.nama_lengkap_pria}</h3>
-                  <p className="text-slate-500 text-base leading-relaxed">Putra tercinta dari: <br/><span className="font-bold text-slate-800">Bapak {data.nama_ayah_pria}</span> & <span className="font-bold text-slate-800">Ibu {data.nama_ibu_pria}</span></p>
-                </div>
-              </Reveal>
-
-              <Reveal><h2 className="text-7xl font-serif text-amber-200 font-extralight my-12 md:my-0">&</h2></Reveal>
-
               {/* MEMPELAI WANITA */}
-              <Reveal direction="left" className="flex-1">
+              <Reveal direction="right" className="flex-1">
                 <div className="flex flex-col items-center group">
                   <div className="w-56 h-72 md:w-72 md:h-96 rounded-t-[12rem] overflow-hidden border-[12px] border-slate-50 shadow-2xl mb-8 relative transition-transform duration-700 group-hover:-translate-y-4">
                     <img src={imgWanita} alt="Wanita" className="w-full h-full object-cover" />
@@ -248,6 +234,21 @@ export default function InvitationPage({ params, searchParams }) {
                   <p className="text-slate-500 text-base leading-relaxed">Putri tercinta dari: <br/><span className="font-bold text-slate-800">Bapak {data.nama_ayah_wanita}</span> & <span className="font-bold text-slate-800">Ibu {data.nama_ibu_wanita}</span></p>
                 </div>
               </Reveal>
+
+              <Reveal><h2 className="text-7xl font-serif text-amber-200 font-extralight my-12 md:my-0">&</h2></Reveal>
+
+              {/* MEMPELAI PRIA */}
+              <Reveal direction="left" className="flex-1">
+                <div className="flex flex-col items-center group">
+                  <div className="w-56 h-72 md:w-72 md:h-96 rounded-t-[12rem] overflow-hidden border-[12px] border-slate-50 shadow-2xl mb-8 relative transition-transform duration-700 group-hover:-translate-y-4">
+                    <img src={imgPria} alt="Pria" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 border border-amber-200/60 rounded-t-[12rem] m-4 pointer-events-none"></div>
+                  </div>
+                  <h3 className="text-4xl md:text-5xl font-serif text-slate-900 mb-4">{data.nama_lengkap_pria}</h3>
+                  <p className="text-slate-500 text-base leading-relaxed">Putra tercinta dari: <br/><span className="font-bold text-slate-800">Bapak {data.nama_ayah_pria}</span> & <span className="font-bold text-slate-800">Ibu {data.nama_ibu_pria}</span></p>
+                </div>
+              </Reveal>
+              
             </div>
           </div>
         </section>
@@ -434,7 +435,7 @@ export default function InvitationPage({ params, searchParams }) {
            <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
            <Reveal direction="up">
               <h2 className="text-5xl md:text-7xl font-serif italic mb-8 text-amber-300 drop-shadow-lg">{data.nama_pria} & {data.nama_wanita}</h2>
-              <p className="text-sm text-white/60 mb-16 tracking-[0.4em] uppercase font-light">#NaufalZackyWeddingMomen</p>
+              <p className="text-sm text-white/60 mb-16 tracking-[0.4em] uppercase font-light">FluxWeddingMoment</p>
               
               <div className="w-20 h-px bg-white/20 mx-auto my-10"></div>
               
