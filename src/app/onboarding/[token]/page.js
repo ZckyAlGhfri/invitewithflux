@@ -74,16 +74,25 @@ export default function OnboardingPage() {
   if (isValidating) return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">Membuka formulir aman...</div>;
   if (errorMsg) return <div className="min-h-screen flex items-center justify-center text-red-500">{errorMsg}</div>;
 
-  if (finalSlug) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 text-center">
-      <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <h1 className="text-3xl font-serif italic text-slate-900 mb-4">Undangan Berhasil Dibuat!</h1>
-      <p className="text-slate-500 mb-8">URL unik undangan Anda adalah:</p>
-      <div className="bg-white px-6 py-4 rounded-xl shadow-sm border border-slate-200 text-slate-700 font-bold tracking-wide">
-        domain.com/{finalSlug}
+  if (finalSlug) {
+    // Ambil domain secara otomatis langsung dari browser
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 text-center">
+        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h1 className="text-3xl font-serif italic text-slate-900 mb-4">Undangan Berhasil Dibuat!</h1>
+        <p className="text-slate-500 mb-8">URL unik undangan Anda adalah:</p>
+        <div className="bg-white px-6 py-4 rounded-xl shadow-sm border border-slate-200 text-slate-700 font-bold tracking-wide flex items-center justify-center gap-2">
+          {/* URL Dinamis */}
+          <span className="text-slate-400">{baseUrl}/</span>
+          <span className="text-amber-600">{finalSlug}</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex py-12 px-4 justify-center">
