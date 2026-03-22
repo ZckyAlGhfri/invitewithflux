@@ -1,31 +1,34 @@
 'use client';
-import Image from 'next/image';
-import Reveal from './Reveal';
+import Reveal from '@/components/Reveal';
 
 export default function Mempelai({ data, trigger }) {
   if (!data) return null;
 
-  // Menggunakan data asli dari Supabase, dengan fallback (nilai default) jika kosong
+  // Kode SVG Siluet Elegan anti-link-mati
+  const svgWanita = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23f8fafc"><rect width="100" height="100" fill="%23e2e8f0"/><circle cx="50" cy="40" r="15" fill="%2394a3b8"/><path d="M20 100 c0-20 15-35 30-35 s30 15 30 35 z" fill="%2394a3b8"/></svg>`;
+  const svgPria = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23f8fafc"><rect width="100" height="100" fill="%23f1f5f9"/><circle cx="50" cy="40" r="15" fill="%23cbd5e1"/><path d="M25 100 c0-15 10-30 25-30 s25 15 25 30 z" fill="%23cbd5e1"/></svg>`;
+
+  // Menggunakan data asli, dengan fallback teks dan siluet jika kosong
   const mempelaiWanita = {
-    namaPanggilan: data.nama_wanita,
-    namaLengkap: data.nama_lengkap_wanita || `${data.nama_wanita} ...`, 
-    ayah: data.nama_ayah_wanita || "Fulan", 
-    ibu: data.nama_ibu_wanita || "Fulanah",
-    foto: data.foto_wanita || "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=600",
+    namaPanggilan: data.nama_wanita || "Mempelai Wanita",
+    namaLengkap: data.nama_lengkap_wanita || "Nama Lengkap Mempelai Wanita", 
+    ayah: data.nama_ayah_wanita || "Nama Ayah", 
+    ibu: data.nama_ibu_wanita || "Nama Ibu",
+    foto: data.foto_wanita || svgWanita,
   };
 
   const mempelaiPria = {
-    namaPanggilan: data.nama_pria,
-    namaLengkap: data.nama_lengkap_pria || `${data.nama_pria} ...`,
-    ayah: data.nama_ayah_pria || "Fulan", 
-    ibu: data.nama_ibu_pria || "Fulanah",
-    foto: data.foto_pria || "https://images.unsplash.com/photo-1550005816-193a68a15db8?q=80&w=600",
+    namaPanggilan: data.nama_pria || "Mempelai Pria",
+    namaLengkap: data.nama_lengkap_pria || "Nama Lengkap Mempelai Pria",
+    ayah: data.nama_ayah_pria || "Nama Ayah", 
+    ibu: data.nama_ibu_pria || "Nama Ibu",
+    foto: data.foto_pria || svgPria,
   };
 
   const CardProfil = ({ person, gender }) => (
     <div className="flex flex-col items-center px-6 py-10 bg-white rounded-3xl shadow-xl border border-slate-100">
       <div className="relative w-48 h-48 mb-8">
-        <Image src={person.foto} alt={person.namaPanggilan} width={200} height={200} className="rounded-full w-full h-full object-cover" priority />
+        <img src={person.foto} alt={person.namaPanggilan} className="rounded-full w-full h-full object-cover" />
       </div>
       <p className="text-xl text-slate-400 font-serif italic mb-2">{gender === 'wanita' ? 'Putri dari' : 'Putra dari'}</p>
       <p className="text-sm text-slate-700 font-medium mb-1">Bapak {person.ayah}</p>
