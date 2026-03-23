@@ -76,6 +76,33 @@ export default function LandingPage() {
         {/* ============================================================= */}
       </section>
 
+      {/* ================= SHOWCASE DEMO ================= */}
+      <section id="demo" className="py-20 md:py-28 bg-white px-6 border-t border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 md:mb-20">
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-amber-500">Live Preview</span>
+            <h2 className="text-3xl md:text-5xl font-serif mt-4 mb-4 text-slate-900">Pilih Desain Impian</h2>
+            <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto">Klik untuk merasakan langsung pengalaman undangan interaktif kami.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 md:gap-10">
+            {[
+              {title:'Luxury Dark', icon:'✨', slug:'/demo-luxury', desc:'Elegansi malam dengan sentuhan emas mewah.'},
+              {title:'Royal Classic', icon:'🏛️', slug:'/demo-classic', desc:'Nuansa putih bersih dan tipografi abadi.'},
+              {title:'Urban Modern', icon:'🚀', slug:'/demo-modern', desc:'Minimalis, bold, dan sangat kekinian.'}
+            ].map((item,i) => (
+              <div key={i} className="bg-slate-50 p-8 md:p-10 rounded-[2rem] border border-slate-100 text-center hover:border-amber-200 hover:shadow-xl hover:-translate-y-2 transition flex flex-col items-center group">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm group-hover:scale-110 transition">{item.icon}</div>
+                <h3 className="text-xl font-bold font-serif text-slate-800 mb-3">{item.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-8">{item.desc}</p>
+                <Link href={item.slug} className="mt-auto px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-full text-[10px] font-bold uppercase tracking-widest group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600 transition shadow-sm w-full md:w-auto">
+                  Buka Demo Live
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ================= FITUR ================= */}
       <section id="fitur" className="py-20 md:py-28 bg-slate-50 px-6 border-t border-slate-100">
         <div className="max-w-7xl mx-auto">
@@ -141,12 +168,7 @@ export default function LandingPage() {
             <div className="bg-slate-900 border border-slate-800 p-8 md:p-9 rounded-[2.5rem] md:rounded-[2rem] text-center hover:border-slate-700 transition hover:-translate-y-2">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-2">Basic</h3>
               <p className="text-slate-400 text-sm mb-6">Simple & Elegan</p>
-              <div className="mb-8 flex flex-col items-center">
-                <span className="text-sm text-slate-500 line-through decoration-red-500/50 decoration-2 mb-1">Rp 99.000</span>
-                <div className="text-4xl font-bold text-white">
-                  Rp 69<span className="text-slate-500 text-xl">.000</span>
-                </div>
-              </div>
+              <div className="text-3xl md:text-4xl font-bold text-white mb-8">Rp 99<span className="text-slate-500 text-lg md:text-xl">.000</span></div>
               <ul className="text-left text-slate-300 space-y-4 mb-10 text-xs md:text-sm">
                 <li className="flex gap-3"><span className="text-amber-500">✓</span><span>Aktif 3 bulan</span></li>
                 <li className="flex gap-3"><span className="text-amber-500">✓</span><span>Musik background</span></li>
@@ -163,12 +185,7 @@ export default function LandingPage() {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 text-amber-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest px-4 md:px-5 py-2 rounded-full whitespace-nowrap">Paling Diminati</div>
               <h3 className="text-2xl md:text-3xl font-serif text-white mb-2 mt-2">Premium</h3>
               <p className="text-amber-200 text-sm mb-6">Lengkap & Interaktif</p>
-              <div className="mb-10 flex flex-col items-center">
-                <span className="text-sm text-amber-200/60 line-through decoration-red-400 decoration-2 mb-1">Rp 199.000</span>
-                <div className="text-5xl font-bold text-white">
-                  Rp 129<span className="text-amber-300/60 text-2xl">.000</span>
-                </div>
-              </div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-10">Rp 199<span className="text-amber-300/60 text-xl md:text-2xl">.000</span></div>
               <ul className="text-left text-white space-y-4 mb-10 text-xs md:text-sm">
                 <li className="flex gap-3"><span className="text-amber-200">✓</span><span>Aktif 6 bulan</span></li>
                 <li className="flex gap-3"><span className="text-amber-200">✓</span><span>Semua fitur Basic</span></li>
@@ -185,12 +202,7 @@ export default function LandingPage() {
             <div className="bg-slate-900 border border-slate-800 p-8 md:p-9 rounded-[2.5rem] md:rounded-[2rem] text-center hover:border-slate-700 transition hover:-translate-y-2">
               <h3 className="text-xl md:text-2xl font-serif text-white mb-2">Exclusive</h3>
               <p className="text-slate-400 text-sm mb-6">Fasilitas Sang Sultan</p>
-              <div className="mb-8 flex flex-col items-center">
-                <span className="text-sm text-slate-500 line-through decoration-red-500/50 decoration-2 mb-1">Rp 349.000</span>
-                <div className="text-4xl font-bold text-white">
-                  Rp 199<span className="text-slate-500 text-xl">.000</span>
-                </div>
-              </div>
+              <div className="text-3xl md:text-4xl font-bold text-white mb-8">Rp 349<span className="text-slate-500 text-lg md:text-xl">.000</span></div>
               <ul className="text-left text-slate-300 space-y-4 mb-10 text-xs md:text-sm">
                 <li className="flex gap-3"><span className="text-amber-500">✓</span><span>Aktif 1 tahun</span></li>
                 <li className="flex gap-3"><span className="text-amber-500">✓</span><span>Semua fitur Premium</span></li>
