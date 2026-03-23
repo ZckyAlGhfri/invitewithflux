@@ -1,31 +1,27 @@
 import { NextResponse } from 'next/server';
 
 export function middleware(req) {
-  // Cegat semua akses ke /dashboard dan anak-anaknya
-  if (req.nextUrl.pathname.startsWith('/dashboard')) {
-    
-    const authHeader = req.headers.get('authorization');
+  // Cek apakah browser membawa tanda pengenal (Cookie)
+  const authCookie = req.cookies.get('flux_admin_session');
+  
+  const isDashboardRoute = req.nextUrl.pathname.startsWith('/dashboard');
+  const isLoginRoute = req.nextUrl.pathname === '/login';
 
-    if (authHeader) {
-      const authValue = authHeader.split(' ')[1];
-      const [user, pwd] = atob(authValue).split(':');
+  // 1. Jika akses Dashboard tapi belum login -> Usir ke /login
+  if (isDashboardRoute && !authCookie) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
 
-      if (user === 'zkyyy' && pwd === 'flux2026') {
-        return NextResponse.next(); // Gembok terbuka
-      }
-    }
-
-    // Gembok terkunci, paksa munculkan pop-up
-    return new NextResponse('Akses Ditolak. Area Khusus Admin.', {
-      status: 401,
-      headers: { 'WWW-Authenticate': 'Basic realm="Secure Admin Area"' },
-    });
+  // 2. Jika akses /login tapi SUDAH login -> Pindahkan ke Dashboard
+  if (isLoginRoute && authCookie) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
   
+  // Jika aman, biarkan lewat
   return NextResponse.next();
 }
 
-// Menangkap /dashboard dan /dashboard/edit/...
+// Hanya pantau rute-rute ini agar website tidak lambat
 export const config = {
-  matcher: ['/dashboard', '/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/login'],
 };

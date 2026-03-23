@@ -18,7 +18,7 @@ export default function AdminEditPage() {
   const [activeTab, setActiveTab] = useState(1);
 
   const [formData, setFormData] = useState({
-    tier: 'basic', fotoSampul: '', 
+    tier: 'basic', theme: 'luxury', fotoSampul: '', slug: '',
     namaWanita: '', namaLengkapWanita: '', ayahWanita: '', ibuWanita: '', fotoWanita: '', 
     namaPria: '', namaLengkapPria: '', ayahPria: '', ibuPria: '', fotoPria: '', 
     tanggalAkad: '', waktuAkad: '', tempatAkad: '', mapLinkAkad: '',
@@ -65,6 +65,8 @@ export default function AdminEditPage() {
 
       setFormData({
         tier: invite.tier || 'basic',
+        theme: invite.theme || 'luxury', // <-- Tambahkan theme di sini
+        slug: invite.slug || '',
         fotoSampul: invite.foto_sampul || '',
         namaWanita: invite.nama_wanita || '', namaLengkapWanita: invite.nama_lengkap_wanita || '',
         ayahWanita: invite.nama_ayah_wanita || '', ibuWanita: invite.nama_ibu_wanita || '',
@@ -174,7 +176,9 @@ export default function AdminEditPage() {
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans pb-32 flex justify-center selection:bg-amber-200">
       <div className="max-w-4xl w-full">
         
+       {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+          
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all text-slate-500">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 18-6-6 6-6"/></svg>
@@ -184,13 +188,52 @@ export default function AdminEditPage() {
               <p className="text-slate-500 text-sm">Mode bypass keamanan untuk revisi data & upload foto.</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-2">Paket:</span>
-            <select name="tier" value={formData.tier} onChange={handleChange} className="bg-white text-slate-900 px-4 py-2 rounded-xl border border-slate-200 outline-none font-bold text-sm cursor-pointer focus:ring-2 focus:ring-amber-400 transition-all">
-              <option value="basic">⭐ Basic</option><option value="premium">🌟 Premium</option><option value="exclusive">👑 Exclusive</option>
-            </select>
+          
+          {/* SAKELAR KENDALI ADMIN (PAKET & TEMA) - SUDAH DIRAPIKAN */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center justify-between sm:justify-start gap-3 bg-slate-50 p-2 sm:px-4 rounded-2xl border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-2">Paket:</span>
+              <select name="tier" value={formData.tier} onChange={handleChange} className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 outline-none font-bold text-xs sm:text-sm cursor-pointer focus:ring-2 focus:ring-amber-400 transition-all">
+                <option value="basic">⭐ Basic</option><option value="premium">🌟 Premium</option><option value="exclusive">👑 Exclusive</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center justify-between sm:justify-start gap-3 bg-slate-50 p-2 sm:px-4 rounded-2xl border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-2">Tema:</span>
+              <select name="theme" value={formData.theme} onChange={handleChange} className="bg-white text-slate-900 px-3 py-2 rounded-xl border border-slate-200 outline-none font-bold text-xs sm:text-sm cursor-pointer focus:ring-2 focus:ring-amber-400 transition-all">
+                <option value="luxury">✨ Luxury</option>
+                <option value="classic">🏛️ Classic</option>
+                <option value="modern">🚀 Modern</option>
+              </select>
+            </div>
           </div>
         </div>
+        
+
+          {/* --- INJEKSI KARTU KONFIGURASI URL (SLUG) --- */}
+        <div className="mb-8 bg-amber-50 border border-amber-200 p-6 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm relative overflow-hidden">
+          <div className="absolute left-0 top-0 w-2 h-full bg-amber-400"></div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span className="text-xl">🔗</span> Link Undangan (Slug)
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">Ubah nama tautan undangan klien. Hati-hati, mengubah ini akan membuat link lama menjadi tidak aktif!</p>
+          </div>
+          <div className="flex items-center w-full md:w-auto bg-white rounded-xl border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-amber-400 transition-all">
+            <span className="bg-slate-50 px-4 py-3 text-xs font-bold text-slate-400 border-r border-slate-200 select-none hidden sm:block">
+              fluxwedding.id/
+            </span>
+            <input 
+              type="text" 
+              name="slug" 
+              value={formData.slug} 
+              onChange={handleChange} 
+              placeholder="nama-pasangan"
+              className="px-4 py-3 outline-none text-sm font-bold text-slate-800 w-full md:w-48 lowercase" 
+            />
+          </div>
+        </div>
+        {/* --- AKHIR KARTU KONFIGURASI URL --- */}
 
         <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden">
           
@@ -240,7 +283,10 @@ export default function AdminEditPage() {
             {activeTab === 3 && (
               <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
                 {formData.tier === 'basic' ? (
-                  <div className="text-center py-20"><div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔒</div><h2 className="text-xl font-bold text-slate-800 mb-2">Fitur Terkunci</h2><p className="text-slate-500">Galeri foto hanya tersedia untuk paket Premium dan Exclusive.</p></div>
+                  <div className="text-center py-20">
+                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔒</div>
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">Fitur Terkunci</h2>
+                    <p className="text-slate-500">Galeri foto hanya tersedia untuk paket Premium dan Exclusive.</p></div>
                 ) : (
                   <>
                     <div className="border-b border-slate-100 pb-4">
@@ -305,7 +351,20 @@ export default function AdminEditPage() {
             {activeTab === 6 && (
               <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
                 <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6">Musik Pengiring</h2>
-                <div className="p-8 bg-slate-50 border border-slate-200 rounded-2xl"><label className="font-bold text-slate-700 block mb-3">Pilih Lagu Romantis</label><select name="musicUrl" value={formData.musicUrl} onChange={handleChange} className="w-full px-4 py-4 bg-white border border-slate-200 rounded-xl outline-none text-slate-800 font-bold focus:ring-2 focus:ring-amber-400 mb-6 cursor-pointer"><option value="/music/DieWithASmile.mp3">Die With A Smile - Lady Gaga & Bruno Mars</option><option value="/music/AThousandYears.mp3">A Thousand Years - Christina Perri</option><option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita - Tiara Andini</option><option value="/music/TeruntukMia.mp3">Teruntuk Mia - Nadin Amizah</option></select><div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><MusicPreview url={formData.musicUrl} /></div></div>
+                <div className="p-8 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <label className="font-bold text-slate-700 block mb-3">Pilih Lagu Romantis</label>
+                  <select name="musicUrl" value={formData.musicUrl} onChange={handleChange} className="w-full px-4 py-4 bg-white border border-slate-200 rounded-xl outline-none text-slate-800 font-bold focus:ring-2 focus:ring-amber-400 mb-6 cursor-pointer">
+                    <option value="/music/DieWithASmile.mp3">Die With A Smile - Lady Gaga & Bruno Mars</option>
+                    <option value="/music/AThousandYears.mp3">A Thousand Years - Christina Perri</option>
+                    <option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita - Tiara Andini</option>
+                    <option value="/music/TeruntukMia.mp3">Teruntuk Mia - Nuh</option>
+                    <option value="/music/UntilIFoundYou.mp3">Until I Found You - Stephen Sanchez</option>
+                    <option value="/music/chrisye-untukmu.mp3">Untukmu - Chrisye</option>
+                  </select>
+                  <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <MusicPreview url={formData.musicUrl} />
+                  </div>
+                </div>
               </div>
             )}
 

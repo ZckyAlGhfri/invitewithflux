@@ -1,7 +1,9 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
+import { revalidateTag } from 'next/cache';
+import { cookies } from 'next/headers';
 
 export async function getDashboardStats() {
   const { data, error } = await supabase.from('invitations').select('status, is_locked');
@@ -97,6 +99,8 @@ export async function submitOnboardingData(token, formData) {
   const { error: updateError } = await supabase
     .from('invitations')
     .update({
+      theme: formData.theme,
+
       nama_wanita: formData.namaWanita, nama_lengkap_wanita: formData.namaLengkapWanita,
       nama_ayah_wanita: formData.ayahWanita, nama_ibu_wanita: formData.ibuWanita,
       nama_pria: formData.namaPria, nama_lengkap_pria: formData.namaLengkapPria,
@@ -173,20 +177,36 @@ export async function toggleLock(id, currentStatus) {
 }
 
 // --- FUNGSI ADMIN UPDATE ---
+// --- FUNGSI ADMIN UPDATE (DIPERBAIKI) ---
 export async function updateClientByAdmin(id, formData) {
   const { data: invite } = await supabase.from('invitations').select('slug, status').eq('id', id).single();
   
-  let secureSlug = invite.slug;
-  if (!secureSlug || invite.status === 'onboarding') {
-    secureSlug = await generateSecureSlug(formData.namaWanita, formData.namaPria);
+  // LOGIKA SLUG: Prioritaskan ketikan Admin (formData.slug). 
+  // Kalau kosong, pakai slug lama. Kalau masih kosong juga, generate baru.
+  let finalSlug = formData.slug?.trim();
+  if (!finalSlug) {
+    finalSlug = invite.slug || await generateSecureSlug(formData.namaWanita, formData.namaPria);
   }
+
+  // ---> TAMBAHKAN BLOK KEAMANAN INI <---
+  // Cek apakah slug baru ini dipakai oleh ORANG LAIN
+  if (finalSlug !== invite.slug) {
+    const { data: existingSlug } = await supabase.from('invitations').select('id').eq('slug', finalSlug).maybeSingle();
+    if (existingSlug) {
+      throw new Error(`Link /${finalSlug} sudah dipakai oleh klien lain! Silakan gunakan nama yang berbeda.`);
+    }
+  }
+  // ------------------------------------
 
   const newTier = formData.tier || 'basic';
   const isPremiumOrAbove = newTier === 'premium' || newTier === 'exclusive';
 
-  // 1. UPDATE TABEL UTAMA (HAPUS foto_galeri dari sini!)
-  const { error: updateError } = await supabase.from('invitations').update({
+  // 1. UPDATE TABEL UTAMA
+  const { error: updateError } = await supabase
+  .from('invitations').update({
     tier: newTier, 
+    theme: formData.theme || 'luxury',
+    slug: finalSlug, // <--- SEKARANG HANYA ADA 1 SLUG (Final)
     nama_wanita: formData.namaWanita, nama_lengkap_wanita: formData.namaLengkapWanita,
     nama_ayah_wanita: formData.ayahWanita, nama_ibu_wanita: formData.ibuWanita,  
     nama_pria: formData.namaPria, nama_lengkap_pria: formData.namaLengkapPria,
@@ -199,7 +219,7 @@ export async function updateClientByAdmin(id, formData) {
     alamat_kado_fisik: isPremiumOrAbove ? formData.alamatKadoFisik : null,
     music_url: formData.musicUrl, quotes: formData.quotes, house_rules: formData.houseRules,
     love_story: formData.loveStory && formData.loveStory.length > 0 ? JSON.stringify(formData.loveStory) : null,
-    slug: secureSlug, status: 'published', onboard_token: null 
+    status: 'published', onboard_token: null // <-- Hapus slug: secureSlug dari baris ini
   }).eq('id', id);
 
   if (updateError) throw new Error('Error DB: ' + updateError.message);
@@ -214,13 +234,13 @@ export async function updateClientByAdmin(id, formData) {
   }
 
   // 3. UPDATE GALLERIES (BULK INSERT)
-  await supabase.from('galleries').delete().eq('invitation_id', id); // Sapu bersih galeri lama
+  await supabase.from('galleries').delete().eq('invitation_id', id); 
   if (isPremiumOrAbove && formData.fotoGaleri?.length > 0) {
     const validPhotos = formData.fotoGaleri.filter(url => typeof url === 'string' && url.trim() !== '');
     const galleriesToInsert = validPhotos.map((url, index) => ({
       invitation_id: id,
       image_url: url,
-      position: index // Urutan foto (1, 2, 3...)
+      position: index 
     }));
     
     if (galleriesToInsert.length > 0) {
@@ -229,7 +249,7 @@ export async function updateClientByAdmin(id, formData) {
   }
 
   revalidatePath('/dashboard');
-  return secureSlug;
+  return finalSlug;
 }
 
 // --- FUNGSI SUBMIT MAGIC EDIT KLIEN ---
@@ -286,17 +306,49 @@ export async function updateClientByToken(token, formData) {
 
 // 1. Fungsi untuk Klien (Tamu) mengirim ucapan & RSVP
 export async function submitRSVP(invitationId, formData) {
-  const { error } = await supabase.from('guestbook').insert([{
-    invitation_id: invitationId,
+  // 1. Ambil slug dari database menggunakan ID undangan
+  const { data: inv } = await supabase
+    .from('invitations')
+    .select('slug')
+    .eq('id', invitationId)
+    .single();
+
+  // 2. Siapkan kerangka data dari inputan tamu
+  const newData = {
+    id: Math.random(), // ID acak sementara
     nama: formData.get('nama'),
     kehadiran: formData.get('kehadiran'),
-    pesan: formData.get('pesan')
+    pesan: formData.get('pesan'),
+    created_at: new Date().toISOString()
+  };
+
+  // 3. === LOGIKA DEMO (UX SEMPURNA) ===
+  if (inv && inv.slug && inv.slug.startsWith('demo-')) {
+    // Jeda 800ms agar tombol loading di UI terasa natural
+    await new Promise(resolve => setTimeout(resolve, 800)); 
+    
+    // Kembalikan objek data ke Client tanpa menyentuh database
+    return { 
+      success: true, 
+      isDemo: true, 
+      data: newData,
+      message: "Pesan tersampaikan! (Demo Mode)" // <--- INI YANG HILANG
+    };
+  }
+  // ===================================
+
+  // 4. JIKA BUKAN DEMO: Simpan permanen ke Supabase
+  const { error } = await supabase.from('guestbook').insert([{
+    invitation_id: invitationId,
+    nama: newData.nama,
+    kehadiran: newData.kehadiran,
+    pesan: newData.pesan
   }]);
 
   if (error) throw new Error('Gagal mengirim pesan: ' + error.message);
   
-  // Refresh otomatis data di halaman undangan yang bersangkutan
   revalidatePath('/[slug]', 'page'); 
+  return { success: true, isDemo: false };
 }
 
 // 2. Fungsi untuk mengambil daftar ucapan
@@ -319,4 +371,83 @@ export async function deleteRSVP(guestbookId) {
   const { error } = await supabase.from('guestbook').delete().eq('id', guestbookId);
   if (error) throw new Error('Gagal menghapus pesan: ' + error.message);
   revalidatePath('/[slug]', 'page'); 
+}
+
+// 1. Ambil data profil admin untuk ditampilkan di form
+export async function getAdminProfile() {
+  const { data, error } = await supabaseAdmin // <--- Gunakan ini
+    .from('admin_settings')
+    .select('username, display_name, email')
+    .eq('id', 1)
+    .single();
+
+  if (error) {
+    console.error("Gagal mengambil profil admin:", error);
+    return null;
+  }
+  return data;
+}
+
+// 2. Update Profil dan Password
+export async function updateAdminProfile(formData) {
+  const updates = {
+    display_name: formData.get('displayName'),
+    email: formData.get('email'),
+  };
+
+  // Jika admin mengisi kolom password baru, maka ikut di-update
+  const newPassword = formData.get('newPassword');
+  if (newPassword && newPassword.trim() !== '') {
+    updates.password = newPassword.trim();
+  }
+
+  const { error } = await supabaseAdmin // <--- Gunakan ini
+    .from('admin_settings')
+    .update(updates)
+    .eq('id', 1);
+
+  if (error) throw new Error(error.message);
+
+  // Bersihkan cache middleware agar perubahan langsung terasa!
+  revalidateTag('admin_auth');
+  
+  return true;
+}
+
+// === TAMBAHKAN FUNGSI INI DI PALING BAWAH ===
+export async function loginAdmin(username, password) {
+  // 1. LANGSUNG gunakan supabaseAdmin di pencarian pertama untuk menembus RLS
+  const { data, error } = await supabaseAdmin
+    .from('admin_settings')
+    .select('username, password')
+    .eq('id', 1)
+    .single();
+
+  if (error || !data) {
+    console.error("Error DB:", error);
+    throw new Error("Terjadi kesalahan sistem database.");
+  }
+
+  // 2. Cocokkan input form dengan data dari database
+  if (username === data.username && password === data.password) {
+    
+    // 3. Jika cocok, BUAT COOKIE SESI (Bukan memanggil database lagi)
+    const cookieStore = await cookies();
+    cookieStore.set('flux_admin_session', 'authenticated', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24, // Sesi aktif selama 1 Hari
+      path: '/',
+    });
+    
+    return true;
+
+  } else {
+    throw new Error("Username atau Password salah!");
+  }
+}
+
+export async function logoutAdmin() {
+  const cookieStore = await cookies();
+  cookieStore.delete('flux_admin_session');
 }

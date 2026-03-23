@@ -5,6 +5,7 @@ import { updateClientByToken, deleteRSVP } from '@/lib/actions';
 import { uploadImage } from '@/lib/cloudinary';
 import MusicPreview from '@/components/MusicPreview';
 import ImageUploader from '@/components/ImageUploader';
+import WhatsAppHelper from '@/components/WhatsAppHelper';
 
 
 export default function EditClient({ initialData }) {
@@ -223,12 +224,14 @@ export default function EditClient({ initialData }) {
     }
     setIsSubmitting(false);
   };
+  
 
-  // TAMBAHKAN TAB 7: DAFTAR TAMU
+  //9 TAB UTAMA
     const tabs = [
     { id: 1, label: 'Cover' }, { id: 2, label: 'Mempelai' }, { id: 3, label: 'Galeri' },
     { id: 4, label: 'Acara' }, { id: 5, label: 'Kado' }, { id: 6, label: 'Musik' },
-    { id: 7, label: 'Personalisasi' }, { id: 8, label: 'Daftar Tamu' }
+    { id: 7, label: 'Personalisasi' }, { id: 8, label: 'Daftar Tamu' },
+    { id: 9, label: 'Sebar Undangan' }
   ];
 
   return (
@@ -366,7 +369,20 @@ export default function EditClient({ initialData }) {
             {activeTab === 6 && (
                           <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
                             <h2 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6">Musik Pengiring</h2>
-                            <div className="p-8 bg-slate-50 border border-slate-200 rounded-2xl"><label className="font-bold text-slate-700 block mb-3">Pilih Lagu Romantis</label><select name="musicUrl" value={formData.musicUrl} onChange={handleChange} className="w-full px-4 py-4 bg-white border border-slate-200 rounded-xl outline-none text-slate-800 font-bold focus:ring-2 focus:ring-amber-400 mb-6 cursor-pointer"><option value="/music/DieWithASmile.mp3">Die With A Smile - Lady Gaga & Bruno Mars</option><option value="/music/AThousandYears.mp3">A Thousand Years - Christina Perri</option><option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita - Tiara Andini</option><option value="/music/TeruntukMia.mp3">Teruntuk Mia - Nadin Amizah</option></select><div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><MusicPreview url={formData.musicUrl} /></div></div>
+                            <div className="p-8 bg-slate-50 border border-slate-200 rounded-2xl">
+                              <label className="font-bold text-slate-700 block mb-3">Pilih Lagu Romantis</label>
+                              <select name="musicUrl" value={formData.musicUrl} onChange={handleChange} className="w-full px-4 py-4 bg-white border border-slate-200 rounded-xl outline-none text-slate-800 font-bold focus:ring-2 focus:ring-amber-400 mb-6 cursor-pointer">
+                                <option value="/music/DieWithASmile.mp3">Die With A Smile - Lady Gaga & Bruno Mars</option>
+                                <option value="/music/AThousandYears.mp3">A Thousand Years - Christina Perri</option>
+                                <option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita - Tiara Andini</option>
+                                <option value="/music/TeruntukMia.mp3">Teruntuk Mia - Nuh</option>
+                                <option value="/music/UntilIFoundYou.mp3">Until I Found You - Stephen Sanchez</option>
+                                <option value="/music/chrisye-untukmu.mp3">Untukmu - Chrisye</option>
+                              </select>
+                              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <MusicPreview url={formData.musicUrl} />
+                              </div>
+                            </div>
                           </div>
                         )}
 
@@ -586,9 +602,69 @@ export default function EditClient({ initialData }) {
                     </div>
                   </>
                 )}
-              </div>
+              </div>              
             )}
 
+            {/* TAB 9: WHATSAPP HELPER (DENGAN LOGIKA GEMBOK) */}
+            {activeTab === 9 && (
+              <div className="flex flex-col items-center animate-[fadeIn_0.3s_ease-out]">
+                {formData.tier === 'basic' ? (
+                  /* TAMPILAN TERKUNCI UNTUK BASIC */
+                  <div className="text-center py-16 md:py-24 bg-slate-50 rounded-[3rem] border border-slate-200 p-8 shadow-inner max-w-2xl w-full relative overflow-hidden">
+                    {/* Dekorasi Gembok Melayang */}
+                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-amber-100 rounded-full opacity-50 blur-3xl"></div>
+                    
+                    <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-4xl shadow-xl border border-slate-100">
+                      🔒
+                    </div>
+                    
+                    <h2 className="text-2xl md:text-3xl font-serif italic text-slate-800 mb-6">
+                      Fitur Nama Tamu Eksklusif
+                    </h2>
+                    
+                    <p className="text-sm md:text-base text-slate-500 mb-10 leading-relaxed">
+                      Tamu Anda adalah orang spesial. Jangan biarkan mereka merasa seperti "nomor urut" dengan undangan general. 
+                      <br/><br/>
+                      Fitur <strong className="text-slate-800">Custom Guest Link</strong> memungkinkan Anda menampilkan nama tamu secara otomatis di layar undangan. Tingkatkan kesan mewah dan personal sekarang juga!
+                    </p>
+                    
+                    <div className="space-y-4">
+                      <button 
+                        type="button"
+                        onClick={() => alert('Hubungi Admin FluxWedding untuk Upgrade ke Premium/Exclusive!')}
+                        className="px-10 py-4 bg-slate-900 text-white font-bold rounded-full shadow-2xl shadow-slate-300 hover:bg-amber-600 transition-all uppercase tracking-[0.2em] text-xs active:scale-95 w-full sm:w-auto"
+                      >
+                        Buka Fitur Ini Sekarang
+                      </button>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                        Tersedia untuk Paket Premium & Exclusive
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  /* TAMPILAN TERBUKA UNTUK PREMIUM & EXCLUSIVE */
+                  <>
+                    <div className="text-center mb-8">
+                      <h2 className="text-2xl font-serif italic text-slate-800">Siapkan Undangan Anda</h2>
+                      <p className="text-sm text-slate-500 mt-2 px-4">Gunakan tool di bawah untuk membuat pesan WhatsApp yang rapi dan personal.</p>
+                    </div>
+
+                    <WhatsAppHelper 
+                      slug={initialData.slug} 
+                      namaWanita={formData.namaWanita} 
+                      namaPria={formData.namaPria} 
+                    />
+                    
+                    <div className="mt-10 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] w-full max-w-lg text-center">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">Link Undangan Utama:</p>
+                      <code className="text-xs md:text-sm font-bold text-amber-600 break-all bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">
+                        {typeof window !== 'undefined' ? window.location.origin : ''}/{initialData.slug}
+                      </code>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="bg-slate-50 border-t border-slate-200 p-6 flex flex-col sm:flex-row justify-between items-center gap-4">

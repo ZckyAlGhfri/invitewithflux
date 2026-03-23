@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getDashboardData, getDashboardStats, deleteTicket } from '@/lib/actions';
 import CopyButton from '@/components/CopyButton';
 import DeleteButton from '@/components/DeleteButton';
@@ -5,7 +6,6 @@ import LockButton from '@/components/LockButton';
 import LiveSearch from '@/components/LiveSearch';
 import CreateTicketModal from '@/components/CreateTicketModal';
 import SortDropdown from '@/components/SortDropdown';
-import Link from 'next/link';
 import Form from 'next/form';
 
 export default async function AdminDashboard(props) {
@@ -51,46 +51,6 @@ export default async function AdminDashboard(props) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans">
-      
-      {/* SIDEBAR TEMA GELAP (Premium SaaS Look) */}
-      <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800">
-        <div className="p-6 border-b border-slate-800">
-          <div className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/30">🚀</div>
-            FluxWedding
-          </div>
-        </div>
-        <nav className="p-4 flex-1 space-y-2">
-          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-xl font-bold text-sm shadow-inner">
-            <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            Ruang Kendali
-          </Link>
-          <Link href="/dashboard/resellers" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 hover:text-white rounded-xl font-medium text-sm transition-colors">
-            <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-            Reseller & Afiliasi
-          </Link>
-          <Link href="/dashboard/templates" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 hover:text-white rounded-xl font-medium text-sm transition-colors">
-            <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7zM9 11V8M15 11V8M9 16v-2M15 16v-2"/></svg>
-            Galeri Template
-          </Link>
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 hover:text-white rounded-xl font-medium text-sm transition-colors">
-            <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Pengaturan Sistem
-          </Link>
-        </nav>
-        <div className="p-4 border-t border-slate-800 bg-slate-950/50">
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white flex items-center justify-center text-sm font-bold shadow-lg">A</div>
-            <div>
-              <p className="text-sm font-bold text-white">Admin Flux</p>
-              <p className="text-[10px] text-purple-400 uppercase tracking-widest font-bold">Superuser</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* KONTEN UTAMA */}
       <main className="flex-1 p-6 md:p-8 lg:p-10 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           
@@ -139,6 +99,7 @@ export default async function AdminDashboard(props) {
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     <th className="p-5 pl-6">Informasi Klien</th>
                     <th className="p-5">Paket</th>
+                    <th className="p-5">Tema</th>
                     <th className="p-5">Status</th>
                     <th className="p-5">Akses Link</th>
                     <th className="p-5 pr-6 text-right">Manajemen</th>
@@ -148,6 +109,14 @@ export default async function AdminDashboard(props) {
                   {invitations.map((inv) => {
                     const isOnboarding = inv.status === 'onboarding';
                     const tierStyle = tierColors[inv.tier] || tierColors.basic;
+
+                    // --- PEMETAAN VISUAL TEMA ---
+                    const themeMap = {
+                      luxury: { icon: '✨', label: 'Luxury', css: 'bg-slate-900 text-amber-400' },
+                      classic: { icon: '🏛️', label: 'Classic', css: 'bg-amber-50 text-amber-700 border border-amber-200' },
+                      modern: { icon: '🚀', label: 'Modern', css: 'bg-black text-white' }
+                    };
+                    const activeTheme = themeMap[inv.theme] || themeMap.luxury;
                     
                     return (
                       <tr key={inv.id} className={`hover:bg-slate-50/50 transition-colors ${inv.is_locked ? 'bg-red-50/30' : ''}`}>
@@ -177,6 +146,17 @@ export default async function AdminDashboard(props) {
                         <td className="p-5">
                           <span className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-widest ${tierStyle}`}>{inv.tier}</span>
                         </td>
+                        {/* --- SELIPKAN KOLOM TEMA DI SINI --- */}
+                        <td className="p-5">
+                          {isOnboarding ? (
+                            <span className="text-[10px] text-slate-300 italic font-medium">Belum Pilih</span>
+                          ) : (
+                            <div className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 w-fit shadow-sm ${activeTheme.css}`}>
+                              <span>{activeTheme.icon}</span> {activeTheme.label}
+                            </div>
+                          )}
+                        </td>
+                        {/* ----------------------------------- */}
                         <td className="p-5">
                           <div className="flex items-center gap-2">
                             {inv.is_locked ? (
@@ -248,6 +228,5 @@ export default async function AdminDashboard(props) {
 
         </div>
       </main>
-    </div>
   );
 }

@@ -6,6 +6,7 @@ import { submitOnboardingData } from '@/lib/actions';
 import { uploadImage } from '@/lib/cloudinary'; 
 import MusicPreview from '@/components/MusicPreview';
 import ImageUploader from '@/components/ImageUploader';
+import WhatsAppHelper from '@/components/WhatsAppHelper';
 
 export default function OnboardingPage() {
   const params = useParams();
@@ -19,6 +20,7 @@ export default function OnboardingPage() {
   const [clientTier, setClientTier] = useState('basic');
 
   const [formData, setFormData] = useState({
+    theme: 'luxury',
     fotoSampul: '', fotoWanita: '', fotoPria: '',
     namaWanita: '', namaLengkapWanita: '', ayahWanita: '', ibuWanita: '', 
     namaPria: '', namaLengkapPria: '', ayahPria: '', ibuPria: '', 
@@ -30,6 +32,30 @@ export default function OnboardingPage() {
     bankAccounts: [{ bankName: '', accountNumber: '', accountName: '' }],
     fotoGaleri: [] 
   });
+
+const themeOptions = [
+  { 
+    id: 'luxury', 
+    name: 'Luxury Dark', 
+    minTier: 'basic', 
+    preview: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800', 
+    desc: 'Nuansa gelap elegan dengan aksen emas yang mewah.' 
+  },
+  { 
+    id: 'classic', 
+    name: 'Royal Classic', 
+    minTier: 'premium', 
+    preview: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800', 
+    desc: 'Terang, formal, dan berwibawa khas gaya keraton.' 
+  },
+  { 
+    id: 'modern', 
+    name: 'Urban Modern', 
+    minTier: 'exclusive', 
+    preview: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800', 
+    desc: 'Bold, minimalis, dan sangat kekinian untuk pasangan urban.' 
+  },
+];
 
   const handleHouseRuleChange = (index, field, value) => {
     const newRules = [...formData.houseRules]; newRules[index][field] = value;
@@ -59,8 +85,9 @@ export default function OnboardingPage() {
 
   const [jumlahFoto, setJumlahFoto] = useState(1);
   const maxFoto = clientTier === 'exclusive' ? 10 : (clientTier === 'premium' ? 5 : 0);
+  // Update logika totalSteps (Tambah 1 untuk langkah pilih tema)
   const isPremiumOrAbove = clientTier === 'premium' || clientTier === 'exclusive';
-  const totalSteps = isPremiumOrAbove ? 4 : 3;
+  const totalSteps = isPremiumOrAbove ? 5 : 4; // Bertambah karena ada Pilih Tema
 
   useEffect(() => {
     async function validateToken() {
@@ -141,14 +168,35 @@ export default function OnboardingPage() {
   if (finalSlug) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-6 text-center selection:bg-amber-200">
-        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-100"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-        <h1 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-4">Momen Bahagia Siap Dibagikan!</h1>
-        <p className="text-slate-500 mb-10 max-w-md">Data Anda telah tersimpan dengan aman. Bagian yang Anda lewati menggunakan data sementara (dummy) dan dapat diubah kapan saja di Magic Edit.</p>
-        <div className="bg-white px-8 py-5 rounded-2xl shadow-lg border border-slate-200 flex flex-col sm:flex-row items-center justify-center gap-2 mb-10 w-full max-w-lg">
-          <span className="text-slate-400 font-medium text-sm md:text-base break-all">{baseUrl}/<strong className="text-amber-600 text-lg">{finalSlug}</strong></span>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-6 py-20 text-center selection:bg-amber-200">
+        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-100">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="3">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
         </div>
-        <a href={`/${finalSlug}`} className="px-10 py-4 bg-slate-900 text-white rounded-full font-bold uppercase tracking-widest shadow-xl hover:bg-amber-600 transition-colors active:scale-95 text-sm">Lihat Undangan Saya</a>
+        <h1 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-4">Momen Bahagia Siap Dibagikan!</h1>
+        <p className="text-slate-500 mb-10 max-w-md">Data Anda telah tersimpan. Gunakan tool di bawah untuk mulai mengundang tamu melalui WhatsApp.</p>
+        
+        {/* Link Utama */}
+        <div className="bg-white px-8 py-5 rounded-2xl shadow-lg border border-slate-200 flex flex-col sm:flex-row items-center justify-center gap-2 mb-6 w-full max-w-lg">
+          <span className="text-slate-400 font-medium text-sm md:text-base break-all">
+            {baseUrl}/<strong className="text-amber-600 text-lg">{finalSlug}</strong>
+          </span>
+        </div>
+
+        {/* TOOL WHATSAPP HELPER */}
+        <WhatsAppHelper 
+          slug={finalSlug} 
+          namaWanita={formData.namaWanita || "Wanita"} 
+          namaPria={formData.namaPria || "Pria"} 
+        />
+
+        <div className="mt-10 flex gap-4">
+          <a href={`/${finalSlug}`} className="px-10 py-4 bg-slate-900 text-white rounded-full font-bold uppercase tracking-widest shadow-xl hover:bg-amber-600 transition-colors active:scale-95 text-sm">
+            Lihat Undangan
+          </a>
+        </div>
       </div>
     );
   }
@@ -158,13 +206,15 @@ export default function OnboardingPage() {
       <div className="bg-white max-w-3xl w-full p-6 sm:p-10 md:p-14 rounded-none sm:rounded-[2.5rem] sm:shadow-2xl border-0 sm:border border-slate-200 h-fit mb-24 sm:mb-0 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100"><div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(step / totalSteps) * 100}%` }}></div></div>
 
+        {/* JUDUL LANGKAH */}
         <div className="text-center mb-10 pt-4">
           <span className="inline-block px-4 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase rounded-full mb-4">Langkah {step} dari {totalSteps}</span>
           <h1 className="text-3xl sm:text-4xl font-serif italic text-slate-900">
             {step === 1 && "Profil Mempelai"}
-            {step === 2 && "Visual & Musik"}
-            {step === 3 && "Detail Acara"}
-            {step === 4 && "Kado Digital"}
+            {step === 2 && "Pilih Desain Undangan"}
+            {step === 3 && "Visual & Musik"}
+            {step === 4 && "Detail Acara"}
+            {step === 5 && "Kado Digital"}
           </h1>
         </div>
 
@@ -219,8 +269,71 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 2: COVER, GALERI & MUSIK */}
+          {/* STEP 2: PILIH TEMA (NEW!) */}
           {step === 2 && (
+            <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
+              <p className="text-center text-slate-500 text-sm mb-8">Pilih gaya visual yang paling mencerminkan kepribadian Anda dan pasangan.</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {themeOptions.map((theme) => {
+                  // Logika Cek Gembok
+                  const isLocked = (theme.minTier === 'premium' && clientTier === 'basic') || 
+                                  (theme.minTier === 'exclusive' && clientTier !== 'exclusive');
+                  
+                  const isSelected = formData.theme === theme.id;
+
+                  return (
+                    <div 
+                      key={theme.id}
+                      onClick={() => !isLocked && setFormData({...formData, theme: theme.id})}
+                      className={`relative group cursor-pointer overflow-hidden rounded-[2rem] border-2 transition-all duration-500 ${isSelected ? 'border-amber-500 ring-4 ring-amber-50' : 'border-slate-100 hover:border-slate-300'}`}
+                    >
+                      {/* Image Preview */}
+                      <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
+                        <img src={theme.preview} alt={theme.name} className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${isLocked ? 'grayscale opacity-50' : ''}`} />
+                        
+                        {/* Overlay Locked */}
+                        {isLocked && (
+                          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center">
+                            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 border border-white/30">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" strokeWidth="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </div>
+                            <p className="text-white text-[10px] font-bold uppercase tracking-widest mb-1">Terkunci</p>
+                            <p className="text-white/70 text-[9px] leading-relaxed">
+                              {theme.minTier === 'premium' ? 'Tingkatkan ke paket Premium untuk menggunakan tema ini.' : 'Gunakan paket Exclusive untuk gaya Modern yang ikonik.'}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Badge Selected */}
+                        {isSelected && (
+                          <div className="absolute top-4 right-4 bg-amber-500 text-white p-2 rounded-full shadow-lg animate-bounce">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info Theme */}
+                      <div className="p-6 bg-white">
+                        <h4 className={`font-bold mb-1 ${isLocked ? 'text-slate-400' : 'text-slate-900'}`}>{theme.name}</h4>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">{theme.desc}</p>
+                      </div>
+
+                      {/* Tombol Provokasi (Hanya muncul jika terkunci) */}
+                      {isLocked && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[80%] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <button type="button" onClick={(e) => {e.stopPropagation(); alert('Hubungi Admin via WhatsApp untuk upgrade paket!')}} className="w-full py-2 bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-xl">Upgrade Paket Now</button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: COVER, GALERI & MUSIK */}
+          {step === 3 && (
             <div className="space-y-10 animate-[fadeIn_0.3s_ease-out]">
               <div>
                 <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5">Foto Sampul Depan</h3>
@@ -269,17 +382,19 @@ export default function OnboardingPage() {
                 <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5">Lagu Pengiring Romantis</h3>
                 <select name="musicUrl" value={formData.musicUrl} onChange={handleChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-amber-400 focus:bg-white outline-none text-slate-700 font-medium mb-4 text-sm sm:text-base">
                   <option value="/music/DieWithASmile.mp3">Die With A Smile - Lady Gaga & Bruno Mars</option>
-                  <option value="/music/AThousandYears.mp3">A Thousand Years - Christina Perri</option>
-                  <option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita - Tiara Andini</option>
-                  <option value="/music/TeruntukMia.mp3">Teruntuk Mia - Nadin Amizah</option>
+                    <option value="/music/AThousandYears.mp3">A Thousand Years - Christina Perri</option>
+                    <option value="/music/LaguPernikahanKita.mp3">Lagu Pernikahan Kita - Tiara Andini</option>
+                    <option value="/music/TeruntukMia.mp3">Teruntuk Mia - Nuh</option>
+                    <option value="/music/UntilIFoundYou.mp3">Until I Found You - Stephen Sanchez</option>
+                    <option value="/music/chrisye-untukmu.mp3">Untukmu - Chrisye</option>
                 </select>
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><MusicPreview url={formData.musicUrl} /></div>
               </div>
             </div>
           )}
 
-          {/* STEP 3: ACARA */}
-          {step === 3 && (
+          {/* STEP 4: ACARA */}
+          {step === 4 && (
             <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
               
               {/* AKAD */}
@@ -357,8 +472,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-         {/* STEP 4: KADO DIGITAL & LOVE STORY */}
-          {step === 4 && isPremiumOrAbove && (
+         {/* STEP 5: KADO DIGITAL & LOVE STORY */}
+          {step === 5 && isPremiumOrAbove && (
             <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
               
               {/* --- BAGIAN 1: KADO DIGITAL --- */}
