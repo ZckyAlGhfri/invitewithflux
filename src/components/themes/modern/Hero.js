@@ -2,16 +2,23 @@
 import Reveal from '@/components/Reveal';
 import { motion } from 'framer-motion';
 
-export default function Hero({ data, imgSampul }) {
+export default function Hero({ data, imgSampul, colorVariant }) {
   if (!data) return null;
 
-  // Ganti 'LONG' menjadi 'long'
+  const themeStyles = {
+    slate: { accent: "text-slate-400", border: "border-slate-400" },
+    indigo: { accent: "text-indigo-500", border: "border-indigo-500" },
+    rose: { accent: "text-rose-500", border: "border-rose-500" },
+    teal: { accent: "text-teal-400", border: "border-teal-400" },
+    amber: { accent: "text-amber-500", border: "border-amber-500" }
+  };
+  const c = themeStyles[colorVariant] || themeStyles.slate;
+
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <section id="hero" className="relative min-h-screen w-full flex flex-col justify-end bg-black text-white overflow-hidden p-8 md:p-16">
       
-      {/* Background Image Half-Screen (Desktop) */}
       <div className="absolute top-0 right-0 w-full md:w-1/2 h-1/2 md:h-full z-0">
         <img src={imgSampul} alt="Hero" className="w-full h-full object-cover opacity-60 grayscale" />
         <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/40 to-transparent"></div>
@@ -19,7 +26,7 @@ export default function Hero({ data, imgSampul }) {
 
       <div className="relative z-10 max-w-4xl">
         <Reveal direction="left">
-          <span className="text-amber-500 font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Save the date</span>
+          <span className={`${c.accent} font-bold tracking-[0.3em] uppercase text-xs mb-4 block`}>Save the date</span>
           <h2 className="text-7xl md:text-[10rem] font-black uppercase leading-[0.85] tracking-tighter mb-8">
             {data.nama_wanita} <br/>
             <span className="text-white/20">AND</span> <br/>
@@ -29,7 +36,7 @@ export default function Hero({ data, imgSampul }) {
 
         <div className="flex flex-col md:flex-row md:items-center gap-8 mt-12">
           <Reveal direction="up" delay={0.4}>
-            <div className="border-l-4 border-amber-500 pl-6">
+            <div className={`border-l-4 ${c.border} pl-6`}>
               <p className="text-4xl font-bold uppercase tracking-tighter">
                 {formatDate(data.tanggal_akad)}
               </p>
@@ -47,7 +54,6 @@ export default function Hero({ data, imgSampul }) {
         </div>
       </div>
 
-      {/* Industrial Scroll Indicator */}
       <div className="absolute bottom-8 right-8 flex items-center gap-4 rotate-90 origin-right translate-y-[-50%]">
         <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-white/30">Scroll Down</p>
         <div className="w-20 h-px bg-white/20"></div>

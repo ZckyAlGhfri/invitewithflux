@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 
-export default function FloatingNav({ isOpened }) {
+export default function FloatingNav({ isOpened, colorVariant }) {
   const navItems = [
     { name: 'HOME', link: '#hero' },
     { name: 'COUPLE', link: '#couple' },
@@ -9,6 +9,15 @@ export default function FloatingNav({ isOpened }) {
     { name: 'GIFT', link: '#gift' },
     { name: 'RSVP', link: '#rsvp' }
   ];
+
+  const themeStyles = {
+    slate: "hover:bg-slate-500",
+    indigo: "hover:bg-indigo-500",
+    rose: "hover:bg-rose-500",
+    teal: "hover:bg-teal-500",
+    amber: "hover:bg-amber-500"
+  };
+  const hoverBg = themeStyles[colorVariant] || themeStyles.slate;
 
   return (
     <motion.nav 
@@ -22,7 +31,7 @@ export default function FloatingNav({ isOpened }) {
           <a 
             key={item.name} 
             href={item.link}
-            className="px-4 py-3 text-[8px] font-black text-white/40 hover:text-white hover:bg-amber-600 transition-all tracking-[0.3em] flex items-center justify-center border-r border-white/5 last:border-0"
+            className={`px-4 py-3 text-[8px] font-black text-white/40 hover:text-white ${hoverBg} transition-all tracking-[0.3em] flex items-center justify-center border-r border-white/5 last:border-0`}
           >
             {item.name}
           </a>

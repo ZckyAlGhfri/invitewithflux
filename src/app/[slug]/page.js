@@ -2,9 +2,11 @@ import { notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import InvitationClient from './InvitationClient';
 
-// ==========================================
+// BOM PENGHANCUR CACHE NEXT.JS (WAJIB ADA)
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 // SIHIR WHATSAPP PREVIEW (META TAGS) - UPGRADED!
-// ==========================================
 export async function generateMetadata({ params, searchParams }) {
   const unwrappedParams = await params;
   const unwrappedSearchParams = await searchParams; // Ambil parameter URL
@@ -65,7 +67,6 @@ export default async function InvitationPage({ params, searchParams }) {
   const unwrappedSearchParams = await searchParams;
   const slug = unwrappedParams.slug;
 
-  // Fetch data di server (Lebih cepat dan SEO friendly)
   const { data, error } = await supabase
     .from('invitations')
     .select(`*, bank_accounts(*), galleries(*)`) 
@@ -76,16 +77,26 @@ export default async function InvitationPage({ params, searchParams }) {
     notFound();
   }
 
-  // ==========================================
-  // LOGIKA TIER: KUNCI FITUR CUSTOM NAME
-  // ==========================================
-  const isPremiumOrAbove = data.tier === 'premium' || data.tier === 'exclusive';
+  // SIHIR DEMO: OVERRIDE WARNA & TIER DARI URL
+  let finalData = { ...data };
   
-  // Jika Basic, paksa jadi "Tamu Undangan" meskipun URL-nya ditambahi ?to=Naufal
+  // LOGIKA DIPERKUAT: Cek isDemo dari URL ATAU nama slug mengandung kata demo
+  const isDemoUrl = unwrappedSearchParams.isDemo === 'true' || slug.toLowerCase().includes('demo');
+
+  if (isDemoUrl) {
+    if (unwrappedSearchParams.color) {
+      finalData.theme_color = unwrappedSearchParams.color; // Timpa warna
+    }
+    if (unwrappedSearchParams.tier) {
+      finalData.tier = unwrappedSearchParams.tier; // Timpa tier
+    }
+  }
+
+  const isPremiumOrAbove = finalData.tier === 'premium' || finalData.tier === 'exclusive';
+  
   const tamu = isPremiumOrAbove && unwrappedSearchParams.to 
     ? unwrappedSearchParams.to 
     : 'Tamu Undangan';
 
-  // Oper data mentahnya ke komponen Client yang akan merender UI & Animasi
-  return <InvitationClient data={data} tamu={tamu} />;
+  return <InvitationClient data={finalData} tamu={tamu} />;
 }

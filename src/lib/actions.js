@@ -4,6 +4,7 @@ import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
+import { deleteImage } from '@/lib/cloudinary';
 
 export async function getDashboardStats() {
   const { data, error } = await supabase.from('invitations').select('status, is_locked');
@@ -95,11 +96,18 @@ export async function submitOnboardingData(token, formData) {
   // 2. Generate Secure Slug
   const secureSlug = await generateSecureSlug(formData.namaWanita, formData.namaPria);
 
+  // LOGIKA LIMITASI LOVE STORY (Maksimal 3 untuk Premium)
+  let finalLoveStory = formData.loveStory;
+  if (invite.tier === 'premium' && finalLoveStory && finalLoveStory.length > 3) {
+    finalLoveStory = finalLoveStory.slice(0, 3);
+  }
+
   // 3. Update tabel utama (invitations)
   const { error: updateError } = await supabase
     .from('invitations')
     .update({
       theme: formData.theme,
+      theme_color: formData.themeColor || 'gold', // <-- WARNA DARI ONBOARDING
 
       nama_wanita: formData.namaWanita, nama_lengkap_wanita: formData.namaLengkapWanita,
       nama_ayah_wanita: formData.ayahWanita, nama_ibu_wanita: formData.ibuWanita,
@@ -119,7 +127,8 @@ export async function submitOnboardingData(token, formData) {
       foto_wanita: formData.fotoWanita, foto_pria: formData.fotoPria, foto_sampul: formData.fotoSampul,
       alamat_kado_fisik: formData.alamatKadoFisik, music_url: formData.musicUrl,
       quotes: formData.quotes, house_rules: formData.houseRules,
-      love_story: formData.loveStory && formData.loveStory.length > 0 ? JSON.stringify(formData.loveStory) : null,
+      video_prewedding: formData.videoPrewedding || null, // <-- FITUR VIDEO YOUTUBE
+      love_story: finalLoveStory && finalLoveStory.length > 0 ? JSON.stringify(finalLoveStory) : null,
       slug: secureSlug, status: 'published', onboard_token: null 
     })
     .eq('id', invite.id);
@@ -158,12 +167,48 @@ export async function submitOnboardingData(token, formData) {
   return secureSlug;
 }
 
+// === FUNGSI HELPER: KUPAS PUBLIC_ID CLOUDINARY ===
+function extractPublicId(url) {
+  if (!url || typeof url !== 'string') return null;
+  try {
+    // Mencari string yang berawalan 'fluxwedding/' sampai sebelum titik ekstensi (.jpg/.png)
+    const matches = url.match(/(fluxwedding\/[^.]+)/);
+    return matches ? matches[1] : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 // ==========================================
 // FITUR BARU ADMIN
 // ==========================================
 
 // A. Fungsi Hapus Klien
+// A. Fungsi Hapus Klien (DIPERBARUI DENGAN CLOUDINARY CLEANUP)
 export async function deleteTicket(id) {
+  // 1. Ambil semua data URL foto (Utama & Galeri) sebelum barisnya dihapus
+  const { data: invite } = await supabase.from('invitations').select('foto_wanita, foto_pria, foto_sampul').eq('id', id).single();
+  const { data: galleries } = await supabase.from('galleries').select('image_url').eq('invitation_id', id);
+
+  // 2. Kumpulkan semua URL ke dalam satu array
+  const urlsToDelete = [];
+  if (invite) {
+    if (invite.foto_wanita) urlsToDelete.push(invite.foto_wanita);
+    if (invite.foto_pria) urlsToDelete.push(invite.foto_pria);
+    if (invite.foto_sampul) urlsToDelete.push(invite.foto_sampul);
+  }
+  if (galleries) {
+    galleries.forEach(g => { if (g.image_url) urlsToDelete.push(g.image_url); });
+  }
+
+  // 3. Ekstrak public_id dan Lenyapkan dari Cloudinary!
+  const publicIds = urlsToDelete.map(extractPublicId).filter(Boolean);
+  if (publicIds.length > 0) {
+    // Proses hapus paralel agar secepat kilat
+    await Promise.all(publicIds.map(publicId => deleteImage(publicId)));
+  }
+
+  // 4. Setelah Cloudinary bersih, baru hapus data di Supabase
   const { error } = await supabase.from('invitations').delete().eq('id', id);
   if (error) throw new Error('Gagal menghapus klien');
   revalidatePath('/dashboard');
@@ -177,36 +222,63 @@ export async function toggleLock(id, currentStatus) {
 }
 
 // --- FUNGSI ADMIN UPDATE ---
-// --- FUNGSI ADMIN UPDATE (DIPERBAIKI) ---
 export async function updateClientByAdmin(id, formData) {
-  const { data: invite } = await supabase.from('invitations').select('slug, status').eq('id', id).single();
+  // Ambil data LAMA termasuk foto-fotonya
+  const { data: invite } = await supabase.from('invitations')
+    .select('slug, status, foto_wanita, foto_pria, foto_sampul')
+    .eq('id', id).single();
+    
+  const { data: oldGalleries } = await supabase.from('galleries').select('image_url').eq('invitation_id', id);
   
-  // LOGIKA SLUG: Prioritaskan ketikan Admin (formData.slug). 
-  // Kalau kosong, pakai slug lama. Kalau masih kosong juga, generate baru.
+  // === LOGIKA SAPU BERSIH CLOUDINARY ===
+  const urlsToDelete = [];
+  // Cek foto utama yang diganti
+  if (invite.foto_wanita && invite.foto_wanita !== formData.fotoWanita) urlsToDelete.push(invite.foto_wanita);
+  if (invite.foto_pria && invite.foto_pria !== formData.fotoPria) urlsToDelete.push(invite.foto_pria);
+  if (invite.foto_sampul && invite.foto_sampul !== formData.fotoSampul) urlsToDelete.push(invite.foto_sampul);
+
+  // Cek foto galeri yang dibuang (ada di oldGalleries tapi tidak ada di formData.fotoGaleri)
+  const newGalleryUrls = formData.fotoGaleri || [];
+  if (oldGalleries) {
+    oldGalleries.forEach(g => {
+      if (g.image_url && !newGalleryUrls.includes(g.image_url)) {
+        urlsToDelete.push(g.image_url);
+      }
+    });
+  }
+
+  // Eksekusi Hapus di Cloudinary
+  const publicIds = urlsToDelete.map(extractPublicId).filter(Boolean);
+  if (publicIds.length > 0) {
+    await Promise.all(publicIds.map(publicId => deleteImage(publicId)));
+  }
+  // ====================================
+
   let finalSlug = formData.slug?.trim();
   if (!finalSlug) {
     finalSlug = invite.slug || await generateSecureSlug(formData.namaWanita, formData.namaPria);
   }
 
-  // ---> TAMBAHKAN BLOK KEAMANAN INI <---
-  // Cek apakah slug baru ini dipakai oleh ORANG LAIN
   if (finalSlug !== invite.slug) {
     const { data: existingSlug } = await supabase.from('invitations').select('id').eq('slug', finalSlug).maybeSingle();
-    if (existingSlug) {
-      throw new Error(`Link /${finalSlug} sudah dipakai oleh klien lain! Silakan gunakan nama yang berbeda.`);
-    }
+    if (existingSlug) throw new Error(`Link /${finalSlug} sudah dipakai oleh klien lain!`);
   }
-  // ------------------------------------
 
   const newTier = formData.tier || 'basic';
   const isPremiumOrAbove = newTier === 'premium' || newTier === 'exclusive';
 
+  // LOGIKA LIMITASI LOVE STORY (Maksimal 3 untuk Premium)
+  let finalLoveStory = formData.loveStory;
+  if (newTier === 'premium' && finalLoveStory && finalLoveStory.length > 3) {
+    finalLoveStory = finalLoveStory.slice(0, 3);
+  }
+
   // 1. UPDATE TABEL UTAMA
-  const { error: updateError } = await supabase
-  .from('invitations').update({
+  const { error: updateError } = await supabase.from('invitations').update({
     tier: newTier, 
     theme: formData.theme || 'luxury',
-    slug: finalSlug, // <--- SEKARANG HANYA ADA 1 SLUG (Final)
+    theme_color: formData.themeColor || 'gold',
+    slug: finalSlug,
     nama_wanita: formData.namaWanita, nama_lengkap_wanita: formData.namaLengkapWanita,
     nama_ayah_wanita: formData.ayahWanita, nama_ibu_wanita: formData.ibuWanita,  
     nama_pria: formData.namaPria, nama_lengkap_pria: formData.namaLengkapPria,
@@ -218,8 +290,9 @@ export async function updateClientByAdmin(id, formData) {
     foto_wanita: formData.fotoWanita, foto_pria: formData.fotoPria, foto_sampul: formData.fotoSampul,
     alamat_kado_fisik: isPremiumOrAbove ? formData.alamatKadoFisik : null,
     music_url: formData.musicUrl, quotes: formData.quotes, house_rules: formData.houseRules,
-    love_story: formData.loveStory && formData.loveStory.length > 0 ? JSON.stringify(formData.loveStory) : null,
-    status: 'published', onboard_token: null // <-- Hapus slug: secureSlug dari baris ini
+    video_prewedding: formData.videoPrewedding || null, // <-- FITUR VIDEO YOUTUBE
+    love_story: finalLoveStory && finalLoveStory.length > 0 ? JSON.stringify(finalLoveStory) : null,
+    status: 'published', onboard_token: null
   }).eq('id', id);
 
   if (updateError) throw new Error('Error DB: ' + updateError.message);
@@ -233,19 +306,14 @@ export async function updateClientByAdmin(id, formData) {
     if (banks.length > 0) await supabase.from('bank_accounts').insert(banks);
   }
 
-  // 3. UPDATE GALLERIES (BULK INSERT)
+  // 3. UPDATE GALLERIES
   await supabase.from('galleries').delete().eq('invitation_id', id); 
   if (isPremiumOrAbove && formData.fotoGaleri?.length > 0) {
     const validPhotos = formData.fotoGaleri.filter(url => typeof url === 'string' && url.trim() !== '');
     const galleriesToInsert = validPhotos.map((url, index) => ({
-      invitation_id: id,
-      image_url: url,
-      position: index 
+      invitation_id: id, image_url: url, position: index 
     }));
-    
-    if (galleriesToInsert.length > 0) {
-      await supabase.from('galleries').insert(galleriesToInsert);
-    }
+    if (galleriesToInsert.length > 0) await supabase.from('galleries').insert(galleriesToInsert);
   }
 
   revalidatePath('/dashboard');
@@ -254,13 +322,39 @@ export async function updateClientByAdmin(id, formData) {
 
 // --- FUNGSI SUBMIT MAGIC EDIT KLIEN ---
 export async function updateClientByToken(token, formData) {
-  const { data: invite, error } = await supabase.from('invitations').select('id, tier, is_locked').eq('edit_token', token).single();
+  // Ambil data LAMA termasuk foto-fotonya
+  const { data: invite, error } = await supabase.from('invitations')
+    .select('id, tier, is_locked, foto_wanita, foto_pria, foto_sampul')
+    .eq('edit_token', token).single();
+    
   if (error || !invite) throw new Error('Token tidak valid.');
   if (invite.is_locked) throw new Error('Akses Ditolak: Undangan ini telah dikunci oleh Admin.');
 
   const isPremiumOrAbove = invite.tier === 'premium' || invite.tier === 'exclusive';
+  const { data: oldGalleries } = await supabase.from('galleries').select('image_url').eq('invitation_id', invite.id);
 
-  // 1. UPDATE TABEL UTAMA (HAPUS foto_galeri dari sini!)
+  // === LOGIKA SAPU BERSIH CLOUDINARY ===
+  const urlsToDelete = [];
+  if (invite.foto_wanita && invite.foto_wanita !== formData.fotoWanita) urlsToDelete.push(invite.foto_wanita);
+  if (invite.foto_pria && invite.foto_pria !== formData.fotoPria) urlsToDelete.push(invite.foto_pria);
+  if (invite.foto_sampul && invite.foto_sampul !== formData.fotoSampul) urlsToDelete.push(invite.foto_sampul);
+
+  const newGalleryUrls = formData.fotoGaleri || [];
+  if (oldGalleries) {
+    oldGalleries.forEach(g => {
+      if (g.image_url && !newGalleryUrls.includes(g.image_url)) {
+        urlsToDelete.push(g.image_url);
+      }
+    });
+  }
+
+  const publicIds = urlsToDelete.map(extractPublicId).filter(Boolean);
+  if (publicIds.length > 0) {
+    await Promise.all(publicIds.map(publicId => deleteImage(publicId)));
+  }
+  // ====================================
+
+  // 1. UPDATE TABEL UTAMA
   await supabase.from('invitations').update({
     nama_wanita: formData.namaWanita, nama_lengkap_wanita: formData.namaLengkapWanita, 
     nama_ayah_wanita: formData.ayahWanita, nama_ibu_wanita: formData.ibuWanita,  
@@ -284,19 +378,14 @@ export async function updateClientByToken(token, formData) {
     if (banks.length > 0) await supabase.from('bank_accounts').insert(banks);
   }
 
-  // 3. UPDATE GALLERIES (BULK INSERT)
-  await supabase.from('galleries').delete().eq('invitation_id', invite.id); // Sapu bersih galeri lama
+  // 3. UPDATE GALLERIES
+  await supabase.from('galleries').delete().eq('invitation_id', invite.id); 
   if (isPremiumOrAbove && formData.fotoGaleri?.length > 0) {
     const validPhotos = formData.fotoGaleri.filter(url => typeof url === 'string' && url.trim() !== '');
     const galleriesToInsert = validPhotos.map((url, index) => ({
-      invitation_id: invite.id,
-      image_url: url,
-      position: index // Urutan foto
+      invitation_id: invite.id, image_url: url, position: index 
     }));
-    
-    if (galleriesToInsert.length > 0) {
-      await supabase.from('galleries').insert(galleriesToInsert);
-    }
+    if (galleriesToInsert.length > 0) await supabase.from('galleries').insert(galleriesToInsert);
   }
 }
 

@@ -1,13 +1,52 @@
 'use client';
 import Reveal from '@/components/Reveal';
 
-export default function Event({ data, timeLeft }) {
+export default function Event({ data, timeLeft, colorVariant }) {
   if (!data) return null;
+
+  // ================= KAMUS WARNA (DARK MODE) =================
+  const themeStyles = {
+    gold: {
+      primary: "text-amber-400",
+      secondary: "text-amber-300",
+      light: "text-amber-100",
+      bgMain: "bg-amber-600",
+      bgHover: "bg-amber-500",
+      shadow: "shadow-amber-900/50",
+      iconFaint: "text-amber-400/30",
+      iconSolid: "text-amber-500",
+      divider: "bg-amber-400/50"
+    },
+    silver: {
+      // PERBAIKAN: Diperterang menjadi slate-300 & 200 untuk Dark Mode
+      primary: "text-slate-300", 
+      secondary: "text-slate-200",
+      light: "text-white",
+      bgMain: "bg-slate-600",
+      bgHover: "bg-slate-500",
+      shadow: "shadow-slate-900/50",
+      iconFaint: "text-slate-300/30",
+      iconSolid: "text-slate-300",
+      divider: "bg-slate-300/50"
+    },
+    'rose-gold': {
+      primary: "text-rose-400",
+      secondary: "text-rose-300",
+      light: "text-rose-100",
+      bgMain: "bg-rose-600",
+      bgHover: "bg-rose-500",
+      shadow: "shadow-rose-900/50",
+      iconFaint: "text-rose-400/30",
+      iconSolid: "text-rose-500",
+      divider: "bg-rose-400/50"
+    }
+  };
+  const currentStyle = themeStyles[colorVariant] || themeStyles.gold;
+  // ===========================================================
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const formatTime = (dateString) => new Date(dateString).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   
-  // Helper Icon Tata Tertib
   const getRuleIcon = (iconName) => {
     switch (iconName) {
       case 'clock': return <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>;
@@ -25,22 +64,19 @@ export default function Event({ data, timeLeft }) {
     }
   };
 
-  // Parsing JSONB
   let parsedRules = [];
   if (data.house_rules) {
     try { parsedRules = typeof data.house_rules === 'string' ? JSON.parse(data.house_rules) : data.house_rules; } 
     catch (e) { parsedRules = []; }
   }
 
-  // TIER LOGIC
   const isPremiumOrAbove = data.tier === 'premium' || data.tier === 'exclusive';
 
-  // GENERATOR GOOGLE CALENDAR LINK
   const generateGCalLink = (title, date, time, location) => {
     if (!date || !time) return '#';
     try {
       const startDt = new Date(`${date}T${time}:00+07:00`); 
-      const endDt = new Date(startDt.getTime() + 2 * 60 * 60 * 1000); // Acara 2 jam
+      const endDt = new Date(startDt.getTime() + 2 * 60 * 60 * 1000);
       const formatDt = (d) => d.toISOString().replace(/-|:|\.\d+/g, '');
       return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${formatDt(startDt)}/${formatDt(endDt)}&location=${encodeURIComponent(location)}`;
     } catch(e) { return '#'; }
@@ -55,12 +91,11 @@ export default function Event({ data, timeLeft }) {
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <div className="flex flex-col items-center justify-center text-center mb-20">
           <Reveal direction="down">
-            <span className="text-xs font-bold tracking-[0.4em] uppercase text-amber-400 mb-4 block">Save The Date</span>
+            <span className={`text-xs font-bold tracking-[0.4em] uppercase ${currentStyle.primary} mb-4 block`}>Save The Date</span>
             <h2 className="text-5xl md:text-6xl font-serif italic text-white">Momen Bersejarah</h2>
           </Reveal>
         </div>
           
-        {/* THE GRAND COUNTDOWN */}
         {timeLeft && (
           <div className="flex justify-center gap-4 md:gap-10 mb-28">
             {[
@@ -69,8 +104,8 @@ export default function Event({ data, timeLeft }) {
             ].map((time, idx) => (
               <Reveal key={idx} direction="up" delay={idx * 0.1}>
                 <div className="w-20 h-24 md:w-32 md:h-36 bg-white/5 backdrop-blur-md border border-white/10 rounded-[2rem] flex flex-col items-center justify-center shadow-2xl relative overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-amber-400/50 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
-                  <span className="text-4xl md:text-5xl font-serif text-amber-300 mb-2">{String(time.value || 0).padStart(2, '0')}</span>
+                  <div className={`absolute top-0 left-0 w-full h-1 ${currentStyle.divider} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500`}></div>
+                  <span className={`text-4xl md:text-5xl font-serif ${currentStyle.secondary} mb-2`}>{String(time.value || 0).padStart(2, '0')}</span>
                   <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50 font-bold">{time.label}</span>
                 </div>
               </Reveal>
@@ -78,25 +113,23 @@ export default function Event({ data, timeLeft }) {
           </div>
         )}
 
-        {/* KARTU ACARA */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <Reveal direction="right">
             <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-8 md:p-14 rounded-[3rem] text-center shadow-2xl relative overflow-hidden group hover:border-slate-700 transition-colors duration-500 flex flex-col h-full justify-center">
-              <div className="w-1 h-full bg-amber-500 absolute left-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className={`w-1 h-full ${currentStyle.bgHover} absolute left-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
               
-              <div className="w-16 h-16 mx-auto mb-6 text-amber-400/30">
+              <div className={`w-16 h-16 mx-auto mb-6 ${currentStyle.iconFaint}`}>
                 <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.64-2.25 1.64-1.74 0-2.1-.96-2.11-1.66H8.1c.04 1.52 1.04 2.73 2.8 3.12V20h2.36v-1.66c1.83-.31 3.01-1.4 3.01-3.1 0-2.2-1.73-2.8-3.96-3.35z"/></svg>
               </div>
-              <h3 className="text-4xl md:text-5xl font-serif mb-6 text-amber-100">Akad Nikah</h3>
+              <h3 className={`text-4xl md:text-5xl font-serif mb-6 ${currentStyle.light}`}>Akad Nikah</h3>
               <div className="space-y-3 mb-10">
-                <p className="text-amber-400 font-bold uppercase tracking-widest text-sm">{formatDate(data.tanggal_akad)}</p>
+                <p className={`${currentStyle.primary} font-bold uppercase tracking-widest text-sm`}>{formatDate(data.tanggal_akad)}</p>
                 <p className="text-2xl text-white font-light">Pukul {data.waktu_akad || formatTime(data.tanggal_akad)} WIB</p>
               </div>
               <p className="text-slate-400 font-medium mb-12 leading-relaxed text-sm md:text-base max-w-sm mx-auto">{data.tempat_akad}</p>
               
-              {/* BUTTON GROUP */}
               <div className="mt-auto flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href={data.map_link_akad} target="_blank" className="w-full sm:w-auto px-8 py-4 bg-amber-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-white hover:text-slate-900 transition-colors shadow-lg shadow-amber-900/50">Google Maps</a>
+                <a href={data.map_link_akad} target="_blank" className={`w-full sm:w-auto px-8 py-4 ${currentStyle.bgMain} text-white text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-white hover:text-slate-900 transition-colors shadow-lg ${currentStyle.shadow}`}>Google Maps</a>
                 {isPremiumOrAbove && (
                   <a href={generateGCalLink(`Akad Nikah ${data.nama_wanita} & ${data.nama_pria}`, data.tanggal_akad, data.waktu_akad, data.tempat_akad)} target="_blank" className="w-full sm:w-auto px-8 py-4 bg-slate-800 text-white text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-slate-700 transition-colors border border-slate-700 flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Save to Calendar
@@ -108,21 +141,20 @@ export default function Event({ data, timeLeft }) {
 
           <Reveal direction="left">
             <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-8 md:p-14 rounded-[3rem] text-center shadow-2xl relative overflow-hidden group hover:border-slate-700 transition-colors duration-500 flex flex-col h-full justify-center">
-              <div className="w-1 h-full bg-amber-500 absolute left-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className={`w-1 h-full ${currentStyle.bgHover} absolute left-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
               
-              <div className="w-16 h-16 mx-auto mb-6 text-amber-400/30">
+              <div className={`w-16 h-16 mx-auto mb-6 ${currentStyle.iconFaint}`}>
                 <svg fill="currentColor" viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
               </div>
-              <h3 className="text-4xl md:text-5xl font-serif mb-6 text-amber-100">Resepsi</h3>
+              <h3 className={`text-4xl md:text-5xl font-serif mb-6 ${currentStyle.light}`}>Resepsi</h3>
               <div className="space-y-3 mb-10">
-                <p className="text-amber-400 font-bold uppercase tracking-widest text-sm">{formatDate(data.tanggal_resepsi)}</p>
+                <p className={`${currentStyle.primary} font-bold uppercase tracking-widest text-sm`}>{formatDate(data.tanggal_resepsi)}</p>
                 <p className="text-2xl text-white font-light">Pukul {data.waktu_resepsi || formatTime(data.tanggal_resepsi)} WIB</p>
               </div>
               <p className="text-slate-400 font-medium mb-12 leading-relaxed text-sm md:text-base max-w-sm mx-auto">{data.tempat_resepsi}</p>
               
-              {/* BUTTON GROUP */}
               <div className="mt-auto flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href={data.map_link_resepsi} target="_blank" className="w-full sm:w-auto px-8 py-4 bg-amber-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-white hover:text-slate-900 transition-colors shadow-lg shadow-amber-900/50">Google Maps</a>
+                <a href={data.map_link_resepsi} target="_blank" className={`w-full sm:w-auto px-8 py-4 ${currentStyle.bgMain} text-white text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-white hover:text-slate-900 transition-colors shadow-lg ${currentStyle.shadow}`}>Google Maps</a>
                 {isPremiumOrAbove && (
                   <a href={generateGCalLink(`Resepsi Nikah ${data.nama_wanita} & ${data.nama_pria}`, data.tanggal_resepsi, data.waktu_resepsi, data.tempat_resepsi)} target="_blank" className="w-full sm:w-auto px-8 py-4 bg-slate-800 text-white text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-slate-700 transition-colors border border-slate-700 flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Save to Calendar
@@ -133,12 +165,11 @@ export default function Event({ data, timeLeft }) {
           </Reveal>
         </div>
 
-        {/* TATA TERTIB ACARA */}
         {parsedRules && parsedRules.length > 0 && (
           <div className="mt-32 max-w-4xl mx-auto px-4">
             <Reveal direction="up">
               <div className="text-center mb-16">
-                <p className="text-xs font-bold tracking-[0.4em] uppercase text-amber-400 mb-4 block">House Rules</p>
+                <p className={`text-xs font-bold tracking-[0.4em] uppercase ${currentStyle.primary} mb-4 block`}>House Rules</p>
                 <h3 className="text-3xl md:text-4xl font-serif italic text-white">Tata Tertib Acara</h3>
               </div>
             </Reveal>
@@ -146,7 +177,7 @@ export default function Event({ data, timeLeft }) {
               {parsedRules.map((rule, idx) => (
                 <Reveal key={idx} delay={idx * 0.1} direction="up">
                   <div className="flex flex-col items-center text-center p-8 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-[2rem] hover:bg-slate-800/50 transition-colors h-full">
-                    <div className="w-12 h-12 mb-5 text-amber-500 opacity-80">
+                    <div className={`w-12 h-12 mb-5 ${currentStyle.iconSolid} opacity-80`}>
                       {getRuleIcon(rule.icon)}
                     </div>
                     <p className="text-slate-300 text-sm font-medium leading-relaxed">{rule.text}</p>

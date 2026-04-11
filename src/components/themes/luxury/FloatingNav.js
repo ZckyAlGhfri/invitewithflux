@@ -1,7 +1,16 @@
 'use client';
 import { motion } from 'framer-motion';
 
-export default function FloatingNav({ isOpened }) {
+export default function FloatingNav({ isOpened, colorVariant }) {
+  // ================= KAMUS WARNA =================
+  const themeStyles = {
+    gold: { textHover: "hover:text-amber-600" },
+    silver: { textHover: "hover:text-slate-600" },
+    'rose-gold': { textHover: "hover:text-rose-600" }
+  };
+  const currentStyle = themeStyles[colorVariant] || themeStyles.gold;
+  // ===============================================
+
   const navItems = [
     { name: 'Home', link: '#countdown', icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -24,7 +33,7 @@ export default function FloatingNav({ isOpened }) {
     <motion.nav 
       initial={{ opacity: 0, y: 100 }}
       animate={isOpened ? { opacity: 1, y: 0 } : { opacity: 0, y: 100 }}
-      transition={{ delay: 1, duration: 0.8 }} // Muncul setelah animasi utama selesai
+      transition={{ delay: 1, duration: 0.8 }}
       className="fixed bottom-6 left-1/2 z-[90] -translate-x-1/2"
     >
       <div className="flex items-center gap-1 bg-white/80 backdrop-blur-md px-3 py-2 rounded-full shadow-2xl border border-slate-100">
@@ -32,7 +41,7 @@ export default function FloatingNav({ isOpened }) {
           <a 
             key={item.name} 
             href={item.link}
-            className="flex flex-col items-center justify-center text-slate-500 hover:text-slate-900 px-3 py-1 rounded-full transition-colors group"
+            className={`flex flex-col items-center justify-center text-slate-500 ${currentStyle.textHover} px-3 py-1 rounded-full transition-colors group`}
           >
             <span className="scale-100 group-hover:scale-110 transition-transform">{item.icon}</span>
             <span className="text-[8px] uppercase tracking-tighter mt-1 font-medium">{item.name}</span>

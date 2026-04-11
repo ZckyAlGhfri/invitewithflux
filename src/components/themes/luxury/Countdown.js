@@ -27,7 +27,6 @@ export default function Countdown({ targetDate }) {
   }, [targetDate]);
 
   const timeBox = (value, label) => (
-    /* Pakai min-w-20 (80px) dan md:min-w-25 (100px) sesuai saran v4 */
     <div className="flex flex-col items-center p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm min-w-20 md:min-w-25 border border-slate-100">
       <span className="text-3xl md:text-4xl font-serif text-slate-800 font-bold">{value}</span>
       <span className="text-[10px] uppercase tracking-widest text-slate-500 mt-1">{label}</span>

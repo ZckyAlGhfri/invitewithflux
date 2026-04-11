@@ -1,8 +1,17 @@
 'use client';
 import Reveal from '@/components/Reveal';
 
-export default function Couple({ data }) {
+export default function Couple({ data, colorVariant }) {
   if (!data) return null;
+
+  const themeStyles = {
+    slate: { accent: "text-slate-400" },
+    indigo: { accent: "text-indigo-500" },
+    rose: { accent: "text-rose-500" },
+    teal: { accent: "text-teal-400" },
+    amber: { accent: "text-amber-500" }
+  };
+  const c = themeStyles[colorVariant] || themeStyles.slate;
 
   const CardProfil = ({ person, gender }) => (
     <div className={`flex flex-col ${gender === 'wanita' ? 'items-start text-left' : 'items-end text-right'} w-full`}>
@@ -14,7 +23,7 @@ export default function Couple({ data }) {
         />
         <div className="absolute inset-0 border-[16px] border-black/20 pointer-events-none"></div>
       </div>
-      <p className="text-amber-500 font-black uppercase tracking-[0.3em] text-[10px] mb-4">
+      <p className={`${c.accent} font-black uppercase tracking-[0.3em] text-[10px] mb-4`}>
         {gender === 'wanita' ? 'The Bride' : 'The Groom'}
       </p>
       <h3 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-4 text-white">

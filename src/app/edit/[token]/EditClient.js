@@ -378,6 +378,7 @@ export default function EditClient({ initialData }) {
                                 <option value="/music/TeruntukMia.mp3">Teruntuk Mia - Nuh</option>
                                 <option value="/music/UntilIFoundYou.mp3">Until I Found You - Stephen Sanchez</option>
                                 <option value="/music/chrisye-untukmu.mp3">Untukmu - Chrisye</option>
+                                <option value="/music/RiskItAll.mp3">Risk It All - Bruno Mars</option>
                               </select>
                               <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                                 <MusicPreview url={formData.musicUrl} />
