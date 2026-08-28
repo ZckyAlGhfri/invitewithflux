@@ -56,7 +56,13 @@ export default function EditClient({ initialData }) {
     quotes: initialData.quotes || '',
     houseRules: parsedRules.length > 0 ? parsedRules : [],
     loveStory: parsedStory,
-    bankAccounts: initialData.bank_accounts && initialData.bank_accounts.length > 0 ? initialData.bank_accounts : [{ bankName: '', accountNumber: '', accountName: '' }],
+    bankAccounts: initialData.bank_accounts && initialData.bank_accounts.length > 0
+      ? initialData.bank_accounts.map((bank) => ({
+          bankName: bank.bank_name,
+          accountNumber: bank.account_number,
+          accountName: bank.account_name,
+        }))
+      : [{ bankName: '', accountNumber: '', accountName: '' }],
     fotoGaleri: initialGaleri
   });
 
@@ -197,23 +203,23 @@ export default function EditClient({ initialData }) {
     setIsSubmitting(true);
     try {
       let finalData = { ...formData };
-      const uploadIfFile = async (item) => {
+      const uploadIfFile = async (item, purpose) => {
         if (item instanceof Blob || item instanceof File) {
           const fd = new FormData(); fd.append('file', item);
-          const res = await uploadImage(fd);
+          const res = await uploadImage(fd, { kind: 'edit', token: finalData.token, purpose });
           if (!res.success) throw new Error(res.error || "Gagal mengunggah foto ke Cloudinary");
           return res.url;
         }
         return item;
       };
 
-      finalData.fotoSampul = await uploadIfFile(finalData.fotoSampul);
-      finalData.fotoWanita = await uploadIfFile(finalData.fotoWanita);
-      finalData.fotoPria = await uploadIfFile(finalData.fotoPria);
+      finalData.fotoSampul = await uploadIfFile(finalData.fotoSampul, 'cover');
+      finalData.fotoWanita = await uploadIfFile(finalData.fotoWanita, 'profile');
+      finalData.fotoPria = await uploadIfFile(finalData.fotoPria, 'profile');
 
       if (finalData.fotoGaleri?.length > 0) {
         const validPhotos = finalData.fotoGaleri.filter(foto => foto);
-        finalData.fotoGaleri = await Promise.all(validPhotos.map(foto => uploadIfFile(foto)));
+        finalData.fotoGaleri = await Promise.all(validPhotos.map(foto => uploadIfFile(foto, 'gallery')));
       }
 
       await updateClientByToken(finalData.token, finalData);
@@ -579,13 +585,13 @@ export default function EditClient({ initialData }) {
                                 <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                   <td className="p-4 align-top whitespace-nowrap"><p className="font-bold text-slate-800">{guest.nama}</p><p className="text-[10px] text-slate-400 mt-1">{new Date(guest.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p></td>
                                   <td className="p-4 align-top whitespace-nowrap"><span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${guest.kehadiran === 'Hadir' ? 'bg-emerald-100 text-emerald-700' : guest.kehadiran === 'Tidak Hadir' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{guest.kehadiran}</span></td>
-                                  <td className="p-4 align-top min-w-[200px] text-slate-600 italic">"{guest.pesan}"</td>
+                                  <td className="p-4 align-top min-w-[200px] text-slate-600 italic">&ldquo;{guest.pesan}&rdquo;</td>
                                   <td className="p-4 align-top text-center">
                                     <button 
                                       type="button" 
                                       onClick={async () => {
                                         if(confirm(`Yakin ingin menghapus secara permanen pesan dari ${guest.nama}?`)) {
-                                          try { await deleteRSVP(guest.id); alert('Pesan berhasil dibasmi!'); router.refresh(); } 
+                                          try { await deleteRSVP(guest.id, formData.token); alert('Pesan berhasil dihapus.'); router.refresh(); }
                                           catch(err) { alert('Gagal menghapus'); }
                                         }
                                       }} 
@@ -624,7 +630,7 @@ export default function EditClient({ initialData }) {
                     </h2>
                     
                     <p className="text-sm md:text-base text-slate-500 mb-10 leading-relaxed">
-                      Tamu Anda adalah orang spesial. Jangan biarkan mereka merasa seperti "nomor urut" dengan undangan general. 
+                      Tamu Anda adalah orang spesial. Jangan biarkan mereka merasa seperti &ldquo;nomor urut&rdquo; dengan undangan general.
                       <br/><br/>
                       Fitur <strong className="text-slate-800">Custom Guest Link</strong> memungkinkan Anda menampilkan nama tamu secara otomatis di layar undangan. Tingkatkan kesan mewah dan personal sekarang juga!
                     </p>
@@ -688,5 +694,3 @@ export default function EditClient({ initialData }) {
     </div>
   );
 }
-
-

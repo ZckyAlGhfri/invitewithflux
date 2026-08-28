@@ -1,15 +1,42 @@
-// src/lib/supabase.js
+import 'server-only';
+
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Kunci rahasia server
+let publicClient;
+let adminClient;
 
-// Klien standar (Publik / Anon)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function requiredEnvironment(name) {
+  const value = process.env[name];
+  if (!value) throw new Error(`Konfigurasi ${name} belum tersedia.`);
+  return value;
+}
 
-// Klien master (Admin) untuk menembus RLS database
-// Kita gunakan pengecekan agar tidak error jika dijalankan di sisi client (browser)
-export const supabaseAdmin = supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey) 
-  : null;
+const clientOptions = {
+  auth: {
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    persistSession: false,
+  },
+};
+
+export function getSupabasePublic() {
+  if (!publicClient) {
+    publicClient = createClient(
+      requiredEnvironment('NEXT_PUBLIC_SUPABASE_URL'),
+      requiredEnvironment('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+      clientOptions,
+    );
+  }
+  return publicClient;
+}
+
+export function getSupabaseAdmin() {
+  if (!adminClient) {
+    adminClient = createClient(
+      requiredEnvironment('NEXT_PUBLIC_SUPABASE_URL'),
+      requiredEnvironment('SUPABASE_SERVICE_ROLE_KEY'),
+      clientOptions,
+    );
+  }
+  return adminClient;
+}

@@ -2,20 +2,25 @@
 import { useState, useEffect } from 'react';
 import { submitRSVP, getGuestbook } from '@/lib/actions';
 
-export default function Guestbook({ invitationId, theme = 'luxury', colorVariant = 'gold' }) {
+export default function Guestbook({ invitationSlug, theme = 'luxury', colorVariant = 'gold' }) {
   const [listUcapan, setListUcapan] = useState([]);
   const [isSending, setIsSending] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchComments() {
-      if (!invitationId) return;
-      const data = await getGuestbook(invitationId);
-      setListUcapan(data);
-      setLoading(false);
+      if (!invitationSlug) return;
+      try {
+        const data = await getGuestbook(invitationSlug);
+        setListUcapan(data);
+      } catch {
+        setListUcapan([]);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchComments();
-  }, [invitationId]);
+  }, [invitationSlug]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,14 +28,14 @@ export default function Guestbook({ invitationId, theme = 'luxury', colorVariant
     const formData = new FormData(e.target);
     
     try {
-      const response = await submitRSVP(invitationId, formData);
+      const response = await submitRSVP(invitationSlug, formData);
       e.target.reset(); 
 
       if (response && response.isDemo) {
         setListUcapan(prev => [response.data, ...prev]);
         alert(response.message); 
       } else {
-        const newData = await getGuestbook(invitationId);
+        const newData = await getGuestbook(invitationSlug);
         setListUcapan(newData);
       }
     } catch (error) {

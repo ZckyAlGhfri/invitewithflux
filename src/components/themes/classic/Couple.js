@@ -1,6 +1,21 @@
 'use client';
 import Reveal from '@/components/Reveal';
 
+function ProfileCard({ person, gender, style }) {
+  return (
+    <div className="flex flex-col items-center px-4 py-8 bg-transparent">
+      <div className={`relative w-48 h-64 mb-8 p-1.5 border ${style.border} rounded-t-[10rem]`}>
+        <img src={person.foto} alt={person.namaPanggilan} className="w-full h-full object-cover rounded-t-[10rem] grayscale-[20%]" />
+      </div>
+      <p className={`text-sm ${style.textMuted} font-serif italic mb-2`}>{gender === 'wanita' ? 'Putri dari' : 'Putra dari'}</p>
+      <p className={`text-xs ${style.textMuted} font-medium mb-1 uppercase tracking-widest`}>Bapak {person.ayah}</p>
+      <p className={`text-xs ${style.textMuted} font-medium mb-6 uppercase tracking-widest`}>& Ibu {person.ibu}</p>
+      <h3 className={`text-4xl font-serif ${style.textMain} mb-3`}>{person.namaPanggilan}</h3>
+      <p className={`text-xs ${style.textMuted} font-medium tracking-widest uppercase`}>{person.namaLengkap}</p>
+    </div>
+  );
+}
+
 export default function Couple({ data, colorVariant }) {
   if (!data) return null;
 
@@ -27,19 +42,6 @@ export default function Couple({ data, colorVariant }) {
     ayah: data.nama_ayah_pria || "Nama Ayah", ibu: data.nama_ibu_pria || "Nama Ibu", foto: data.foto_pria || svgPria,
   };
 
-  const CardProfil = ({ person, gender }) => (
-    <div className="flex flex-col items-center px-4 py-8 bg-transparent">
-      <div className={`relative w-48 h-64 mb-8 p-1.5 border ${currentStyle.border} rounded-t-[10rem]`}>
-        <img src={person.foto} alt={person.namaPanggilan} className="w-full h-full object-cover rounded-t-[10rem] grayscale-[20%]" />
-      </div>
-      <p className={`text-sm ${currentStyle.textMuted} font-serif italic mb-2`}>{gender === 'wanita' ? 'Putri dari' : 'Putra dari'}</p>
-      <p className={`text-xs ${currentStyle.textMuted} font-medium mb-1 uppercase tracking-widest`}>Bapak {person.ayah}</p>
-      <p className={`text-xs ${currentStyle.textMuted} font-medium mb-6 uppercase tracking-widest`}>& Ibu {person.ibu}</p>
-      <h3 className={`text-4xl font-serif ${currentStyle.textMain} mb-3`}>{person.namaPanggilan}</h3>
-      <p className={`text-xs ${currentStyle.textMuted} font-medium tracking-widest uppercase`}>{person.namaLengkap}</p>
-    </div>
-  );
-
   return (
     <section id="couple" className={`py-24 px-4 bg-transparent overflow-hidden relative border-y ${currentStyle.border}`}>
       <div className={`absolute top-4 left-4 right-4 bottom-4 border ${currentStyle.border} pointer-events-none opacity-50`}></div>
@@ -48,9 +50,9 @@ export default function Couple({ data, colorVariant }) {
           <h2 className={`text-xl md:text-2xl font-serif ${currentStyle.textMain} uppercase tracking-[0.4em] mb-16 text-center`}>Mempelai</h2>
         </Reveal>
         <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] items-center gap-8">
-          <Reveal direction="left" delay={0.2}><CardProfil person={mempelaiWanita} gender="wanita" /></Reveal>
+          <Reveal direction="left" delay={0.2}><ProfileCard person={mempelaiWanita} gender="wanita" style={currentStyle} /></Reveal>
           <Reveal direction="fade" delay={0.4}><div className={`text-5xl ${currentStyle.textAccent} font-light text-center font-serif italic`}>&</div></Reveal>
-          <Reveal direction="right" delay={0.2}><CardProfil person={mempelaiPria} gender="pria" /></Reveal>
+          <Reveal direction="right" delay={0.2}><ProfileCard person={mempelaiPria} gender="pria" style={currentStyle} /></Reveal>
         </div>
       </div>
     </section>

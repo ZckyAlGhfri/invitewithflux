@@ -50,7 +50,7 @@ export default function LoginPage() {
               type="text" 
               name="username" 
               required 
-              autoComplete="off"
+              autoComplete="username"
               className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:bg-white transition-colors text-sm font-medium text-slate-800" 
             />
           </div>
@@ -60,6 +60,7 @@ export default function LoginPage() {
               type="password" 
               name="password" 
               required 
+              autoComplete="current-password"
               className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:bg-white transition-colors text-sm font-medium text-slate-800" 
             />
           </div>

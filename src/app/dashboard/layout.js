@@ -1,7 +1,9 @@
-import Link from 'next/link'; // <--- INI YANG HILANG
+import { redirect } from 'next/navigation';
+import { hasValidAdminSession } from '@/lib/auth/admin';
 import Sidebar from '@/components/Sidebar';
 
-export default function DashboardLayout({ children }) {
+export default async function DashboardLayout({ children }) {
+  if (!(await hasValidAdminSession())) redirect('/login');
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
       

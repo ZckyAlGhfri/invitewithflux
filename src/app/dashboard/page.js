@@ -178,12 +178,14 @@ export default async function AdminDashboard(props) {
                               label="Link Form" 
                               type="blue" 
                             />
-                          ) : (
+                          ) : inv.tier === 'premium' || inv.tier === 'exclusive' ? (
                             <CopyButton 
                               textToCopy={`${baseUrl}/edit/${inv.edit_token}`} 
                               label="Magic Edit" 
                               type="purple" 
                             />
+                          ) : (
+                            <span className="text-[10px] text-slate-400">Tidak termasuk paket</span>
                           )}
                         </td>
                         <td className="p-5 pr-6 text-right">
