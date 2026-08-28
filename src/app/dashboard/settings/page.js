@@ -20,20 +20,9 @@ export default function SettingsPage() {
     setIsSaving(true);
     
     const formData = new FormData(e.target);
-    const pwd1 = formData.get('newPassword');
-    const pwd2 = formData.get('confirmPassword');
-
-    if (pwd1 !== pwd2) {
-      alert("Password baru dan konfirmasi tidak cocok!");
-      setIsSaving(false);
-      return;
-    }
-
     try {
       await updateAdminProfile(formData);
-      alert("Pengaturan berhasil disimpan! Jika Anda mengganti password, Anda akan diminta login ulang saat merefresh halaman.");
-      e.target.newPassword.value = '';
-      e.target.confirmPassword.value = '';
+      alert("Pengaturan profil berhasil disimpan.");
     } catch (err) {
       alert("Gagal menyimpan: " + err.message);
     }
@@ -99,23 +88,16 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* CARD 2: GANTI PASSWORD */}
+              {/* CARD 2: KREDENSIAL LOGIN */}
               <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-red-400"></div>
                 <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-3">
-                  <span className="p-2 bg-red-50 text-red-500 rounded-lg">🔑</span> Ganti Password
+                  <span className="p-2 bg-red-50 text-red-500 rounded-lg">🔑</span> Kredensial Login
                 </h2>
-                <p className="text-xs text-slate-500 mb-6 -mt-3">Kosongkan kolom ini jika Anda tidak ingin mengubah password.</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Password Baru</label>
-                    <input type="password" name="newPassword" placeholder="Minimal 6 karakter" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:bg-white transition-colors text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Konfirmasi Password</label>
-                    <input type="password" name="confirmPassword" placeholder="Ulangi sandi baru" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:bg-white transition-colors text-sm" />
-                  </div>
-                </div>
+                <p className="text-sm text-slate-600 leading-relaxed -mt-3">
+                  Username dan password disimpan sebagai environment variable. Password tidak lagi disimpan
+                  sebagai teks biasa di database. Perubahan kredensial dilakukan melalui konfigurasi deployment.
+                </p>
               </div>
 
             </form>

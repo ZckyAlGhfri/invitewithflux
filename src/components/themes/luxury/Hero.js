@@ -60,7 +60,7 @@ export default function Hero({ data, imgSampul, colorVariant }) {
         {data.quotes && (
           <Reveal delay={1.1} direction="up">
             <div className="max-w-xl mx-auto mt-4 mb-8 relative">
-              <span className={`absolute -top-6 left-1/2 -translate-x-1/2 text-5xl ${currentStyle.quote} font-serif opacity-50`}>"</span>
+              <span className={`absolute -top-6 left-1/2 -translate-x-1/2 text-5xl ${currentStyle.quote} font-serif opacity-50`}>&ldquo;</span>
               <p className="text-sm md:text-base text-slate-300 italic font-serif leading-relaxed text-center drop-shadow-md px-6 whitespace-pre-line">
                 {data.quotes}
               </p>

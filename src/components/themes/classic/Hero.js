@@ -57,7 +57,7 @@ export default function Hero({ data, imgSampul, colorVariant }) {
           <Reveal delay={0.8}>
             <div className="max-w-lg mx-auto mt-2 px-6 relative">
               <p className={`text-xs md:text-sm ${currentStyle.textMuted} italic font-serif leading-relaxed text-center whitespace-pre-line`}>
-                "{data.quotes}"
+                &ldquo;{data.quotes}&rdquo;
               </p>
             </div>
           </Reveal>

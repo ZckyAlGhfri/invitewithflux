@@ -1,5 +1,11 @@
 import { notFound } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import {
+  PUBLIC_INVITATION_SELECT,
+  PUBLIC_METADATA_SELECT,
+  toPublicInvitation,
+} from '@/lib/public-invitation';
+import { getSupabasePublic } from '@/lib/supabase';
+import { normalizeThemeColor, normalizeTier } from '@/lib/tier-policy';
 import InvitationClient from './InvitationClient';
 
 // BOM PENGHANCUR CACHE NEXT.JS (WAJIB ADA)
@@ -12,9 +18,14 @@ export async function generateMetadata({ params, searchParams }) {
   const unwrappedSearchParams = await searchParams; // Ambil parameter URL
   const slug = unwrappedParams.slug;
   
-  const { data, error } = await supabase.from('invitations').select('*').eq('slug', slug).single();
+  const { data, error } = await getSupabasePublic().from('invitations')
+    .select(PUBLIC_METADATA_SELECT)
+    .eq('slug', slug)
+    .single();
 
-  if (error || !data) return { title: 'Undangan Digital - FluxWedding' };
+  if (error || !data || data.status !== 'published' || data.is_locked) {
+    return { title: 'Undangan Digital - InviteWithFlux' };
+  }
 
   const tglAcara = new Date(data.tanggal_akad).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://invitewithflux.vercel.app';
@@ -67,35 +78,34 @@ export default async function InvitationPage({ params, searchParams }) {
   const unwrappedSearchParams = await searchParams;
   const slug = unwrappedParams.slug;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabasePublic()
     .from('invitations')
-    .select(`*, bank_accounts(*), galleries(*)`) 
+    .select(PUBLIC_INVITATION_SELECT)
     .eq('slug', slug)
     .single();
 
-  if (error || !data || data.status !== 'published') {
+  if (error || !data || data.status !== 'published' || data.is_locked) {
     notFound();
   }
 
-  // SIHIR DEMO: OVERRIDE WARNA & TIER DARI URL
-  let finalData = { ...data };
-  
-  // LOGIKA DIPERKUAT: Cek isDemo dari URL ATAU nama slug mengandung kata demo
-  const isDemoUrl = unwrappedSearchParams.isDemo === 'true' || slug.toLowerCase().includes('demo');
+  const isDemoUrl = slug.toLowerCase().startsWith('demo-')
+    && unwrappedSearchParams.isDemo === 'true';
+  const tierOverride = isDemoUrl && unwrappedSearchParams.tier
+    ? normalizeTier(unwrappedSearchParams.tier)
+    : undefined;
+  const finalData = toPublicInvitation(data, { tierOverride });
 
   if (isDemoUrl) {
     if (unwrappedSearchParams.color) {
-      finalData.theme_color = unwrappedSearchParams.color; // Timpa warna
-    }
-    if (unwrappedSearchParams.tier) {
-      finalData.tier = unwrappedSearchParams.tier; // Timpa tier
+      finalData.theme_color = normalizeThemeColor(
+        finalData.theme,
+        String(unwrappedSearchParams.color).slice(0, 30),
+      );
     }
   }
 
-  const isPremiumOrAbove = finalData.tier === 'premium' || finalData.tier === 'exclusive';
-  
-  const tamu = isPremiumOrAbove && unwrappedSearchParams.to 
-    ? unwrappedSearchParams.to 
+  const tamu = finalData.capabilities.personalizedGuest && unwrappedSearchParams.to
+    ? String(unwrappedSearchParams.to).slice(0, 100)
     : 'Tamu Undangan';
 
   return <InvitationClient data={finalData} tamu={tamu} />;

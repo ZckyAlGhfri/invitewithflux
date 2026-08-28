@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import Reveal from '@/components/Reveal';
 import Guestbook from '@/components/Guestbook';
 import { motion } from 'framer-motion';
-import useSecurity from '@/hooks/useSecurity';
 
 // IMPORT COMPONENT TEMA LUXURY
 import Cover from '@/components/themes/luxury/Cover';
@@ -36,8 +35,6 @@ import ModernGift from '@/components/themes/modern/Gift';
 import ModernFloatingNav from '@/components/themes/modern/FloatingNav';
 
 export default function InvitationClient({ data, tamu }) {
-  useSecurity();
-
   const [isOpened, setIsOpened] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -148,11 +145,13 @@ export default function InvitationClient({ data, tamu }) {
               </>
             )}
 
-            <div id="rsvp" className="relative bg-white border-t border-stone-300 pt-10">
-              <Reveal direction="up">
-                <Guestbook invitationId={data.id} theme="classic" colorVariant={colorVariant} />
-              </Reveal>
-            </div>
+            {data.capabilities.rsvp && (
+              <div id="rsvp" className="relative bg-white border-t border-stone-300 pt-10">
+                <Reveal direction="up">
+                  <Guestbook invitationSlug={data.slug} theme="classic" colorVariant={colorVariant} />
+                </Reveal>
+              </div>
+            )}
 
             <footer className="bg-stone-100 text-stone-500 text-center py-20 border-t border-stone-300">
                 <Reveal direction="up">
@@ -163,7 +162,7 @@ export default function InvitationClient({ data, tamu }) {
                 </Reveal>
             </footer>
           </div>
-          <ClassicFloatingNav isOpened={isOpened} colorVariant={colorVariant} />
+          <ClassicFloatingNav isOpened={isOpened} colorVariant={colorVariant} showRsvp={data.capabilities.rsvp} />
         </div>
       </div>
     );
@@ -193,11 +192,13 @@ export default function InvitationClient({ data, tamu }) {
             </>
           )}
 
-          <div id="rsvp" className="bg-stone-900 py-24 px-6 border-y border-white/5">
-            <Reveal direction="up">
-              <Guestbook invitationId={data.id} theme="modern" colorVariant={colorVariant} />
-            </Reveal>
-          </div>
+          {data.capabilities.rsvp && (
+            <div id="rsvp" className="bg-stone-900 py-24 px-6 border-y border-white/5">
+              <Reveal direction="up">
+                <Guestbook invitationSlug={data.slug} theme="modern" colorVariant={colorVariant} />
+              </Reveal>
+            </div>
+          )}
 
           <footer className="bg-black text-center py-24 border-t border-white/5">
              <h2 className="text-4xl font-black uppercase text-white tracking-tighter">
@@ -207,7 +208,7 @@ export default function InvitationClient({ data, tamu }) {
           </footer>
         </div>
 
-        <ModernFloatingNav isOpened={isOpened} colorVariant={colorVariant} />
+        <ModernFloatingNav isOpened={isOpened} colorVariant={colorVariant} showRsvp={data.capabilities.rsvp} />
       </div>
     );
   }
@@ -249,11 +250,13 @@ export default function InvitationClient({ data, tamu }) {
           </>
         )}
 
-        <div id="rsvp" className="relative bg-slate-50 border-t border-slate-200/50">
-          <Reveal direction="up">
-            <Guestbook invitationId={data.id} theme={data.theme} colorVariant={data.theme_color} />
-          </Reveal>
-        </div>
+        {data.capabilities.rsvp && (
+          <div id="rsvp" className="relative bg-slate-50 border-t border-slate-200/50">
+            <Reveal direction="up">
+              <Guestbook invitationSlug={data.slug} theme={data.theme} colorVariant={data.theme_color} />
+            </Reveal>
+          </div>
+        )}
 
         <footer className="bg-slate-950 text-white text-center py-24 pb-40 relative overflow-hidden">
             <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
@@ -268,7 +271,7 @@ export default function InvitationClient({ data, tamu }) {
         </footer>
       </div>
 
-      <FloatingNav isOpened={isOpened} colorVariant={colorVariant} />
+      <FloatingNav isOpened={isOpened} colorVariant={colorVariant} showRsvp={data.capabilities.rsvp} />
 
     </div>
   );

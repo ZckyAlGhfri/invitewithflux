@@ -2,11 +2,14 @@
   "name": "undangan-digital",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --conditions=react-server --test tests/*.test.mjs",
+    "admin:hash-password": "node --conditions=react-server scripts/hash-admin-password.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.3",
@@ -14,16 +17,17 @@
     "framer-motion": "^12.38.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
-    "next": "16.2.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-easy-crop": "^5.5.6"
+    "next": "^16.3.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-easy-crop": "^5.5.6",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.0",
+    "eslint-config-next": "^16.3.3",
     "tailwindcss": "^4"
   }
 }

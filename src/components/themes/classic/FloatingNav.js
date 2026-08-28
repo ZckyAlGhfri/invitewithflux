@@ -1,14 +1,14 @@
 'use client';
 import { motion } from 'framer-motion';
 
-export default function FloatingNav({ isOpened, colorVariant }) {
+export default function FloatingNav({ isOpened, colorVariant, showRsvp = true }) {
   const navItems = [
     { name: 'Home', link: '#hero', icon: 'H' },
     { name: 'Couple', link: '#couple', icon: 'C' },
     { name: 'Event', link: '#event', icon: 'E' },
     { name: 'Gift', link: '#gift', icon: 'G' },
     { name: 'RSVP', link: '#rsvp', icon: 'R' }
-  ];
+  ].filter((item) => showRsvp || item.name !== 'RSVP');
 
   const themeStyles = {
     emerald: "text-emerald-400 hover:text-emerald-900 border-emerald-300",

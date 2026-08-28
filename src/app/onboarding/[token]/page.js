@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { submitOnboardingData } from '@/lib/actions';
+import { getOnboardingContext, submitOnboardingData } from '@/lib/actions';
 import { uploadImage } from '@/lib/cloudinary'; 
 import MusicPreview from '@/components/MusicPreview';
 import ImageUploader from '@/components/ImageUploader';
@@ -72,7 +71,7 @@ export default function OnboardingPage() {
   const addHouseRule = () => setFormData({ ...formData, houseRules: [...formData.houseRules, { icon: 'clock', text: '' }] });
   const removeHouseRule = (index) => setFormData({ ...formData, houseRules: formData.houseRules.filter((_, i) => i !== index) });
 
-  const maxLoveStory = clientTier === 'premium' ? 3 : 99; // Limitasi Love Story Klien
+  const maxLoveStory = clientTier === 'exclusive' ? 10 : 0;
 
   const handleLoveStoryChange = (index, field, value) => { const newStory = [...(formData.loveStory || [])]; newStory[index][field] = value; setFormData({ ...formData, loveStory: newStory }); };
   const addLoveStory = () => {
@@ -92,9 +91,12 @@ export default function OnboardingPage() {
   useEffect(() => {
     async function validateToken() {
       if (!token) return;
-      const { data, error } = await supabase.from('invitations').select('id, tier').eq('onboard_token', token).single();
-      if (error || !data) setErrorMsg('Tiket Pendaftaran tidak valid atau sudah kadaluarsa.');
-      else setClientTier(data.tier || 'basic');
+      try {
+        const data = await getOnboardingContext(token);
+        setClientTier(data.tier || 'basic');
+      } catch {
+        setErrorMsg('Tiket Pendaftaran tidak valid atau sudah digunakan.');
+      }
       setIsValidating(false);
     }
     validateToken();
@@ -118,23 +120,23 @@ export default function OnboardingPage() {
       if (skip.akad) { finalData.tanggalAkad = ''; finalData.waktuAkad = ''; finalData.tempatAkad = ''; finalData.mapLinkAkad = ''; }
       if (skip.resepsi) { finalData.tanggalResepsi = ''; finalData.waktuResepsi = ''; finalData.tempatResepsi = ''; finalData.mapLinkResepsi = ''; }
 
-      const uploadIfFile = async (item) => {
+      const uploadIfFile = async (item, purpose) => {
         if (item instanceof Blob || item instanceof File) {
           const fd = new FormData(); fd.append('file', item);
-          const res = await uploadImage(fd);
+          const res = await uploadImage(fd, { kind: 'onboarding', token, purpose });
           if (!res.success) throw new Error(res.error || "Gagal mengunggah foto");
           return res.url;
         }
         return item;
       };
 
-      if (!skip.sampul) finalData.fotoSampul = await uploadIfFile(finalData.fotoSampul);
-      if (!skip.wanita) finalData.fotoWanita = await uploadIfFile(finalData.fotoWanita);
-      if (!skip.pria) finalData.fotoPria = await uploadIfFile(finalData.fotoPria);
+      if (!skip.sampul) finalData.fotoSampul = await uploadIfFile(finalData.fotoSampul, 'cover');
+      if (!skip.wanita) finalData.fotoWanita = await uploadIfFile(finalData.fotoWanita, 'profile');
+      if (!skip.pria) finalData.fotoPria = await uploadIfFile(finalData.fotoPria, 'profile');
 
       if (finalData.fotoGaleri?.length > 0) {
         const validPhotos = finalData.fotoGaleri.filter(foto => foto);
-        finalData.fotoGaleri = await Promise.all(validPhotos.map(foto => uploadIfFile(foto)));
+        finalData.fotoGaleri = await Promise.all(validPhotos.map(foto => uploadIfFile(foto, 'gallery')));
       }
 
       const generatedSlug = await submitOnboardingData(token, finalData);
@@ -970,14 +972,18 @@ export default function OnboardingPage() {
                       Ceritakan momen bersejarah hubungan Anda.
                     </p>
 
-                    {clientTier === 'premium' && (
+                    {clientTier === 'exclusive' ? (
                       <p
                         className="
                           text-[10px] font-bold uppercase
                           tracking-widest text-amber-600 mt-2
                         "
                       >
-                        Maksimal {maxLoveStory} Cerita (Paket Premium)
+                        Maksimal {maxLoveStory} Cerita (Paket Exclusive)
+                      </p>
+                    ) : (
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-2">
+                        Tersedia pada Paket Exclusive
                       </p>
                     )}
                   </div>
@@ -1004,7 +1010,9 @@ export default function OnboardingPage() {
 
                 {(formData.loveStory || []).length === 0 ? (
                   <div className="text-center py-8 bg-slate-50 border border-slate-200 border-dashed rounded-2xl text-slate-400 text-xs font-medium">
-                    Belum ada cerita yang ditambahkan.
+                    {clientTier === 'exclusive'
+                      ? 'Belum ada cerita yang ditambahkan.'
+                      : 'Fitur Perjalanan Cinta tidak termasuk dalam paket ini.'}
                   </div>
                 ) : (
                   <div className="space-y-4">

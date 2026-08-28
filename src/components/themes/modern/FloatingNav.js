@@ -1,14 +1,14 @@
 'use client';
 import { motion } from 'framer-motion';
 
-export default function FloatingNav({ isOpened, colorVariant }) {
+export default function FloatingNav({ isOpened, colorVariant, showRsvp = true }) {
   const navItems = [
     { name: 'HOME', link: '#hero' },
     { name: 'COUPLE', link: '#couple' },
     { name: 'EVENT', link: '#event' },
     { name: 'GIFT', link: '#gift' },
     { name: 'RSVP', link: '#rsvp' }
-  ];
+  ].filter((item) => showRsvp || item.name !== 'RSVP');
 
   const themeStyles = {
     slate: "hover:bg-slate-500",

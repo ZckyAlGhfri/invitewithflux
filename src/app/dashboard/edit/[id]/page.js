@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { updateClientByAdmin } from '@/lib/actions';
+import { getAdminInvitation, updateClientByAdmin } from '@/lib/actions';
 import { uploadImage } from '@/lib/cloudinary'; 
 import MusicPreview from '@/components/MusicPreview';
 import ImageUploader from '@/components/ImageUploader';
@@ -34,12 +33,18 @@ export default function AdminEditPage() {
 
   const [jumlahFoto, setJumlahFoto] = useState(1);
   const maxFoto = formData.tier === 'exclusive' ? 10 : (formData.tier === 'premium' ? 5 : 0);
-  const maxLoveStory = formData.tier === 'premium' ? 3 : 99; // Limitasi Love Story
+  const maxLoveStory = formData.tier === 'exclusive' ? 10 : 0;
 
   useEffect(() => {
     async function fetchData() {
-      const { data: invite } = await supabase.from('invitations').select('*, bank_accounts(*), galleries(*)').eq('id', id).single();
-      if (!invite) { alert("Data tidak ditemukan!"); router.push('/dashboard'); return; }
+      let invite;
+      try {
+        invite = await getAdminInvitation(id);
+      } catch {
+        alert("Data tidak ditemukan atau sesi Anda telah berakhir!");
+        router.push('/dashboard');
+        return;
+      }
 
       let fetchedBanks = [];
       if (invite.tier !== 'basic' && invite.bank_accounts?.length > 0) {
@@ -102,22 +107,22 @@ export default function AdminEditPage() {
     setIsSubmitting(true);
     try {
       let finalData = { ...formData };
-      const uploadIfFile = async (item) => {
+      const uploadIfFile = async (item, purpose) => {
         if (item instanceof Blob || item instanceof File) {
           const fd = new FormData(); fd.append('file', item);
-          const res = await uploadImage(fd);
+          const res = await uploadImage(fd, { kind: 'admin', invitationId: id, purpose });
           if (!res.success) throw new Error(res.error || "Gagal mengunggah foto");
           return res.url; 
         }
         return item; 
       };
 
-      finalData.fotoSampul = await uploadIfFile(finalData.fotoSampul);
-      finalData.fotoWanita = await uploadIfFile(finalData.fotoWanita);
-      finalData.fotoPria = await uploadIfFile(finalData.fotoPria);
+      finalData.fotoSampul = await uploadIfFile(finalData.fotoSampul, 'cover');
+      finalData.fotoWanita = await uploadIfFile(finalData.fotoWanita, 'profile');
+      finalData.fotoPria = await uploadIfFile(finalData.fotoPria, 'profile');
       if (finalData.fotoGaleri?.length > 0) {
         const validPhotos = finalData.fotoGaleri.filter(foto => foto);
-        finalData.fotoGaleri = await Promise.all(validPhotos.map(foto => uploadIfFile(foto)));
+        finalData.fotoGaleri = await Promise.all(validPhotos.map(foto => uploadIfFile(foto, 'gallery')));
       }
 
       await updateClientByAdmin(id, finalData);
@@ -322,8 +327,8 @@ export default function AdminEditPage() {
                       <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
                         <span className="text-2xl">💌</span> Perjalanan Cinta
                       </h2>
-                      {formData.tier === 'premium' && (
-                        <p className="text-xs text-amber-600 mt-2 font-bold">Maksimal {maxLoveStory} cerita untuk paket Premium.</p>
+                      {formData.tier === 'exclusive' && (
+                        <p className="text-xs text-amber-600 mt-2 font-bold">Maksimal {maxLoveStory} cerita untuk paket Exclusive.</p>
                       )}
                     </div>
                     {formData.loveStory?.length < maxLoveStory && (
@@ -333,9 +338,9 @@ export default function AdminEditPage() {
                     )}
                   </div>
 
-                  {formData.tier === 'basic' && (
+                  {formData.tier !== 'exclusive' && (
                      <div className="mb-6 text-center py-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-xs font-bold uppercase tracking-widest">
-                       ⚠️ Peringatan Admin: Paket saat ini Basic. Fitur Love Story dimatikan pada undangan.
+                       Fitur Love Story hanya tersedia untuk Paket Exclusive dan akan diabaikan saat disimpan.
                      </div>
                   )}
 

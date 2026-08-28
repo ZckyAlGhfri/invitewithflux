@@ -2,14 +2,14 @@
 import { useState, useRef, useEffect } from 'react';
 
 export default function MusicPreview({ url }) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingUrl, setPlayingUrl] = useState(null);
   const audioRef = useRef(null);
+  const isPlaying = playingUrl === url;
 
   // Jika URL berubah (user memilih lagu lain), hentikan lagu sebelumnya
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.pause();
-      setIsPlaying(false);
       audioRef.current.load();
     }
   }, [url]);
@@ -17,10 +17,11 @@ export default function MusicPreview({ url }) {
   const togglePlay = () => {
     if (isPlaying) {
       audioRef.current.pause();
+      setPlayingUrl(null);
     } else {
       audioRef.current.play();
+      setPlayingUrl(url);
     }
-    setIsPlaying(!isPlaying);
   };
 
   // Jika tidak ada URL atau custom, jangan tampilkan preview
@@ -28,7 +29,7 @@ export default function MusicPreview({ url }) {
 
   return (
     <div className="flex items-center gap-4 mt-4 p-4 bg-purple-50 rounded-2xl border border-purple-100 transition-all">
-      <audio ref={audioRef} src={url} onEnded={() => setIsPlaying(false)} />
+      <audio ref={audioRef} src={url} onEnded={() => setPlayingUrl(null)} />
       <button
         type="button"
         onClick={togglePlay}

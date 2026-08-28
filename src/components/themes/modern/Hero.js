@@ -47,7 +47,7 @@ export default function Hero({ data, imgSampul, colorVariant }) {
           {data.quotes && (
             <Reveal direction="up" delay={0.6}>
               <p className="max-w-xs text-xs text-white/40 uppercase leading-relaxed tracking-widest italic">
-                "{data.quotes}"
+                &ldquo;{data.quotes}&rdquo;
               </p>
             </Reveal>
           )}
